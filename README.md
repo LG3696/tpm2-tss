@@ -45,16 +45,12 @@ If this test suite is executed against a TPM other than the software simulator i
 You have been warned.
 
 ## Simulator
-The TPM library specification contains reference code sufficient to construct a software TPM 2.0 simulator.
-This code was provided by Microsoft and they provide a binary download for Windows [here](https://www.microsoft.com/en-us/download/details.aspx?id=52507).
-IBM has repackaged this code with a few Makefiles so that the Microsoft code can be built and run on Linux systems.
-The Linux version of the Microsoft TPM 2.0 simulator can be obtained [here](https://downloads.sourceforge.net/project/ibmswtpm2/ibmtpm974.tar.gz).
+The TPM library specification contains reference code sufficient to construct a software
+[TPM 2.0 simulator](https://github.com/Microsoft/ms-tpm-20-ref).
 Once you've downloaded and successfully built and execute the simulator it will, by default, be accepting connections on the localhost, TCP ports 2321 and 2322.
 
-Issues building or running the simulator should be reported to the IBM software TPM2 project.
-
-NOTE: The Intel TCG TSS is currently tested against version 974 of the simulator.
-Compatibility with later versions has not yet been tested.
+Issues building or running the simulator should be reported to the dedicated
+[Microsoft's GitHub repository](https://github.com/Microsoft/ms-tpm-20-ref).
 
 ## Testing
 To test the various TCTI, SAPI and ESAPI api calls, unit and integration tests can
