@@ -71,9 +71,10 @@ info_from_handle (void *dlhandle)
 
     return info_func ();
 }
+
 TSS2_RC
-handle_from_name(const char *file,
-                 void **handle)
+handle_from_name (const char *file,
+                  void **handle)
 {
     char file_xfrm [PATH_MAX] = { 0, };
     size_t size;
@@ -119,11 +120,12 @@ handle_from_name(const char *file,
 
     return TSS2_RC_SUCCESS;
 }
+
 TSS2_RC
-tcti_from_file(const char *file,
-               const char* conf,
-               TSS2_TCTI_CONTEXT **tcti,
-               void **dlhandle)
+tcti_from_file (const char *file,
+                const char* conf,
+                TSS2_TCTI_CONTEXT **tcti,
+                void **dlhandle)
 {
     TSS2_RC r;
     void *handle;
@@ -159,9 +161,10 @@ tcti_from_file(const char *file,
 
     return TSS2_RC_SUCCESS;
 }
+
 TSS2_RC
-get_info_default(const TSS2_TCTI_INFO **info,
-                 void **dlhandle)
+get_info_default (const TSS2_TCTI_INFO **info,
+                  void **dlhandle)
 {
     void *handle = NULL;
     const TSS2_TCTI_INFO *info_src;
@@ -211,7 +214,7 @@ get_info_default(const TSS2_TCTI_INFO **info,
 }
 
 TSS2_RC
-tctildr_get_default(TSS2_TCTI_CONTEXT ** tcticontext, void **dlhandle)
+tctildr_get_default (TSS2_TCTI_CONTEXT ** tcticontext, void **dlhandle)
 {
     if (tcticontext == NULL) {
         LOG_ERROR("tcticontext must not be NULL");
@@ -270,7 +273,7 @@ info_from_name (const char *name,
     return rc;
 }
 TSS2_RC
-tctildr_get_info(const char *name,
+tctildr_get_info (const char *name,
                  const TSS2_TCTI_INFO **info,
                  void **data)
 {
@@ -285,10 +288,10 @@ tctildr_get_info(const char *name,
     }
 }
 TSS2_RC
-tctildr_get_tcti(const char *name,
-                 const char* conf,
-                 TSS2_TCTI_CONTEXT **tcti,
-                 void **data)
+tctildr_get_tcti (const char *name,
+                  const char* conf,
+                  TSS2_TCTI_CONTEXT **tcti,
+                  void **data)
 {
     LOG_DEBUG("name: \"%s\", conf: \"%s\"", name, conf);
     if (tcti == NULL) {
