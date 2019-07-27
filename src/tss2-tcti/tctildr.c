@@ -106,7 +106,7 @@ tcti_from_info (TSS2_TCTI_INFO_FUNC infof,
  * - "tcti-name", "tcti-name:" -> tcti-name copied to 'name', 'conf'
  *   unchanged
  * - ":tcti-conf" -> tcti-conf copied to 'conf', 'name' unchanged
- * - "tcti-name:tcti-conf" - "tcti-name" copied to 'name,', "tcti-conf"
+ * - "tcti-name:tcti-conf" - "tcti-name" copied to 'name', "tcti-conf"
  *   copied to 'conf'
  */
 TSS2_RC
