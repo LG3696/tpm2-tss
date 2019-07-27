@@ -28,13 +28,13 @@ typedef struct {
 } TSS2_TCTILDR_CONTEXT;
 
 TSS2_RC
-tcti_from_init(TSS2_TCTI_INIT_FUNC init,
-               const char* conf,
-               TSS2_TCTI_CONTEXT **tcti);
+tcti_from_init (TSS2_TCTI_INIT_FUNC init,
+                const char* conf,
+                TSS2_TCTI_CONTEXT **tcti);
 TSS2_RC
-tcti_from_info(TSS2_TCTI_INFO_FUNC infof,
-               const char* conf,
-               TSS2_TCTI_CONTEXT **tcti);
+tcti_from_info (TSS2_TCTI_INFO_FUNC infof,
+                const char* conf,
+                TSS2_TCTI_CONTEXT **tcti);
 TSS2_RC
 tctildr_conf_parse (const char *name_conf,
                     char *name,

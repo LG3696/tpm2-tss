@@ -14,7 +14,7 @@ tctildr_get_tcti (const char *name,
                   const char* conf,
                   TSS2_TCTI_CONTEXT **tcti,
                   void **dlhandle);
-void tctildr_finalize_data(void **data);
+void tctildr_finalize_data (void **data);
 TSS2_RC
 tctildr_get_info (const char *name,
                   const TSS2_TCTI_INFO **info,

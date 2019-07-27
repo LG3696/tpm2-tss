@@ -114,8 +114,9 @@ struct {
     },
 #endif /* TCTI_MSSIM */
 };
+
 TSS2_RC
-tctildr_get_default(TSS2_TCTI_CONTEXT ** tcticontext, void **dlhandle)
+tctildr_get_default (TSS2_TCTI_CONTEXT ** tcticontext, void **dlhandle)
 {
     TSS2_RC rc;
 

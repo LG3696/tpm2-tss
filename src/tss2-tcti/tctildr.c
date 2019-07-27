@@ -34,9 +34,9 @@
 #include "util/log.h"
 
 TSS2_RC
-tcti_from_init(TSS2_TCTI_INIT_FUNC init,
-               const char* conf,
-               TSS2_TCTI_CONTEXT **tcti)
+tcti_from_init (TSS2_TCTI_INIT_FUNC init,
+                const char* conf,
+                TSS2_TCTI_CONTEXT **tcti)
 {
     TSS2_RC r;
     size_t size;
@@ -71,9 +71,9 @@ tcti_from_init(TSS2_TCTI_INIT_FUNC init,
 }
 
 TSS2_RC
-tcti_from_info(TSS2_TCTI_INFO_FUNC infof,
-               const char* conf,
-               TSS2_TCTI_CONTEXT **tcti)
+tcti_from_info (TSS2_TCTI_INFO_FUNC infof,
+                const char* conf,
+                TSS2_TCTI_CONTEXT **tcti)
 {
     TSS2_RC r;
     LOG_TRACE("Attempting to load TCTI info");
@@ -154,6 +154,7 @@ tctildr_conf_parse (const char *name_conf,
 
     return TSS2_RC_SUCCESS;
 }
+
 TSS2_TCTILDR_CONTEXT*
 tctildr_context_cast (TSS2_TCTI_CONTEXT *ctx)
 {
@@ -162,6 +163,7 @@ tctildr_context_cast (TSS2_TCTI_CONTEXT *ctx)
     }
     return NULL;
 }
+
 TSS2_RC
 tctildr_transmit (
     TSS2_TCTI_CONTEXT *tctiContext,
@@ -174,6 +176,7 @@ tctildr_transmit (
     }
     return Tss2_Tcti_Transmit (ldr_ctx->tcti, command_size, command_buffer);
 }
+
 TSS2_RC
 tctildr_receive (
     TSS2_TCTI_CONTEXT *tctiContext,
@@ -190,6 +193,7 @@ tctildr_receive (
                               response_buffer,
                               timeout);
 }
+
 TSS2_RC
 tctildr_cancel (
     TSS2_TCTI_CONTEXT *tctiContext)
@@ -200,6 +204,7 @@ tctildr_cancel (
     }
     return Tss2_Tcti_Cancel (ldr_ctx->tcti);
 }
+
 TSS2_RC
 tctildr_get_poll_handles (
     TSS2_TCTI_CONTEXT *tctiContext,
@@ -212,6 +217,7 @@ tctildr_get_poll_handles (
     }
     return Tss2_Tcti_GetPollHandles (ldr_ctx->tcti, handles, num_handles);
 }
+
 TSS2_RC
 tctildr_set_locality (
     TSS2_TCTI_CONTEXT *tctiContext,
@@ -223,6 +229,7 @@ tctildr_set_locality (
     }
     return Tss2_Tcti_SetLocality (ldr_ctx->tcti, locality);
 }
+
 TSS2_RC
 tctildr_make_sticky (
     TSS2_TCTI_CONTEXT *tctiContext,
