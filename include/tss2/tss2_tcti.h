@@ -36,6 +36,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include "tss2_common.h"
 #include "tss2_tpm2_types.h"
 
