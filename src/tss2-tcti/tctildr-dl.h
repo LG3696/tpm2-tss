@@ -8,6 +8,10 @@
 #include "tss2_tpm2_types.h"
 #include "tss2_tcti.h"
 
+TSS2_RC
+tctildr_disable_tcti (const char *name);
+TSS2_RC
+tctildr_enable_tcti (const char *name);
 const TSS2_TCTI_INFO*
 info_from_handle (void *dlhandle);
 TSS2_RC

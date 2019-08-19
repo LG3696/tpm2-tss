@@ -468,3 +468,48 @@ Tss2_TctiLdr_Initialize (const char *nameConf,
         return rc;
     return Tss2_TctiLdr_Initialize_Ex (name, conf, tctiContext);
 }
+
+TSS2_RC
+Tss2_TctiLdr_Initialize_Exclude (const char *nameConf,
+                                 TSS2_TCTI_CONTEXT **tctiContext,
+                                 const char *exclude)
+{
+    TSS2_RC rc, rc2;
+    const char *delim = ",";
+    char *exclude_cpy, *state, *tok;
+
+    if (exclude == NULL) {
+        LOG_WARNING ("List of standard TCTIs to exclude is NULL.");
+        exclude = "";
+    }
+
+    exclude_cpy = calloc(strlen(exclude) + 1, sizeof(char));
+    if (exclude_cpy == NULL) {
+        return TSS2_TCTI_RC_MEMORY;
+    }
+
+    strcpy(exclude_cpy, exclude);
+    for (tok = strtok_r (exclude_cpy, delim, &state);
+         tok;
+         tok = strtok_r (NULL, delim, &state)) {
+        rc2 = tctildr_disable_tcti (tok);
+        if (rc2 != TSS2_RC_SUCCESS) {
+            LOG_WARNING ("Failed to disable standard TCTI %s. Moving on.", tok);
+        }
+    }
+
+    rc = Tss2_TctiLdr_Initialize (nameConf, tctiContext);
+
+    strcpy(exclude_cpy, exclude);
+    for (tok = strtok_r (exclude_cpy, delim, &state);
+         tok;
+         tok = strtok_r (NULL, delim, &state)) {
+        rc2 = tctildr_enable_tcti (tok);
+        if (rc2 != TSS2_RC_SUCCESS) {
+            LOG_WARNING ("Failed to enable standard TCTI %s. Moving on.", tok);
+        }
+    }
+
+    free(exclude_cpy);
+    return rc;
+}

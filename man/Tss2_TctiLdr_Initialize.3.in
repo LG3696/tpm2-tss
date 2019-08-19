@@ -3,8 +3,8 @@
 .\"
 .TH Tss2_TctiLdr_Initialize 3 "MARCH 2019" "TPM2 Software Stack"
 .SH NAME
-Tss2_TctiLdr_Initialize, Tss2_TctiLdr_Initialize_Ex \- Instantiate and
-initialize a TCTI context.
+Tss2_TctiLdr_Initialize, Tss2_TctiLdr_Initialize_Ex,
+Tss2_TctiLdr_Initialize_Exclude \- Instantiate and initialize a TCTI context.
 .SH SYNOPSIS
 .B #include <tss2/tss2_tctildr.h>
 .sp
@@ -13,16 +13,22 @@ initialize a TCTI context.
 .sp
 .BI "TSS2_RC Tss2_TctiLdr_Initialize_Ex (const char " "*name" ", const char " "*conf" ", TSS2_TCTI_CONTEXT " "**context" ");"
 .sp
+.BI "TSS2_RC Tss2_TctiLdr_Initialize_Exclude (const char " "*nameConf" ", TSS2_TCTI_CONTEXT " "**context" ", const char " "*exclude" ");"
+.sp
 .SH DESCRIPTION
 The
 .BR Tss2_TctiLdr_Initialize ()
-and
+,
 .BR Tss2_TctiLdr_Initialize_Ex ()
+and
+.BR Tss2_TctiLdr_Initialize_Exclude ()
 functions initialize a TCTI context used to communicate with the TPM2 or
 some intermediate component in the TCG TPM2 software stack.
 .sp
 .BR Tss2_TctiLdr_Initialize ()
-takes a single string that encodes both the name of the TCTI library the
+and
+.BR Tss2_TctiLdr_Initialize_Exclude ()
+take a single string that encodes both the name of the TCTI library the
 caller wishes to instantiate and its desired configuration in the
 .I nameConf
 parameter.
@@ -48,11 +54,18 @@ behaves identically to the
 function with the exception that the TCTI name and configuration are passed
 as separate strings. The encoding of these strings is described in section
 TCTI_CONFIG.
+.sp
+.BR Tss2_TctiLdr_Initialize_Exclude ()
+behaves like
+.BR Tss2_TctiLdr_Initialize ()
+with the exception that a comma separated list of standard TCTIs is passed which
+will not be loaded if no specific TCTI is given.
 .SH TCTI CONFIG
 If the
 .I name
 string is NULL or the emptry string then the initialization functions will
-select a default TCTI appropriate for the platform. On Linux this means
+select a default TCTI appropriate for the platform.
+On Linux this means
 first trying to load a library named
 .I libtss2-tcti-default.so.
 This is a placeholder for distros to provide a distro specific default. It
@@ -66,6 +79,11 @@ libtss2-tcti-device.so.0
 .IP \[bu]
 libtss2-tcti-mssim.so.0
 .RE
+The debugging TCTI
+.I libtss2-tcti-debug.so.0
+takes precedence over all other TCTIs. It will pass all TPM commands and to its
+child TCTI which is selected as explained above. This means the debugging TCTI
+is merely a wrapper.
 .sp
 When the
 .I name

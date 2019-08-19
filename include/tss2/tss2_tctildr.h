@@ -21,6 +21,10 @@ TSS2_RC
 Tss2_TctiLdr_Initialize (const char *nameConf,
                          TSS2_TCTI_CONTEXT **context);
 TSS2_RC
+Tss2_TctiLdr_Initialize_Exclude (const char *nameConf,
+                                 TSS2_TCTI_CONTEXT **tctiContext,
+                                 const char *exclude);
+TSS2_RC
 Tss2_TctiLdr_GetInfo (const char *name,
                       TSS2_TCTI_INFO **info);
 void

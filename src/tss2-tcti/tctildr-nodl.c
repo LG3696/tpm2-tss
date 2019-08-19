@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdbool.h>
 #include <inttypes.h>
 
 #include "tctildr.h"
@@ -56,6 +57,7 @@ struct {
     TSS2_TCTI_INIT_FUNC init;
     char *conf;
     char *description;
+    bool disabled;
 } tctis [] = {
 #ifdef _WIN32
     {
@@ -115,6 +117,38 @@ struct {
 #endif /* TCTI_MSSIM */
 };
 
+static TSS2_RC
+tcti_set_disabled (const char *name, bool disable)
+{
+    for (size_t i = 0; i < ARRAY_SIZE(tctis); ++i) {
+        for (size_t j = 0; j < NAME_ARRAY_SIZE; ++j) {
+            if (strcmp (name, tctis[i].names[j]) == 0) {
+                LOG_DEBUG ("%s standard TCTI: %s",
+                           disable ? "Disabling" : "Enabling", name);
+                tctis[i].disabled = disable;
+                return TSS2_RC_SUCCESS;
+            }
+        }
+    }
+
+    LOG_ERROR ("Failed to %s standard TCTI %s. No such standard TCTI.",
+               disable ? "disable" : "enable",
+               name);
+    return TSS2_TCTI_RC_BAD_VALUE;
+}
+
+TSS2_RC
+tctildr_disable_tcti (const char *name)
+{
+    return tcti_set_disabled (name, true);
+}
+
+TSS2_RC
+tctildr_enable_tcti (const char *name)
+{
+    return tcti_set_disabled (name, false);
+}
+
 TSS2_RC
 tctildr_get_default (TSS2_TCTI_CONTEXT ** tcticontext, void **dlhandle)
 {
@@ -128,6 +162,10 @@ tctildr_get_default (TSS2_TCTI_CONTEXT ** tcticontext, void **dlhandle)
     *tcticontext = NULL;
 
     for (size_t i = 0; i < ARRAY_SIZE(tctis); i++) {
+        if (tctis[i].disabled) {
+            LOG_DEBUG("Skipping disabled tcti %s", tctis[i].names[0]);
+            continue;
+        }
         LOG_DEBUG("Attempting to connect using standard TCTI: %s",
                   tctis[i].description);
         rc = tcti_from_init (tctis[i].init,
@@ -162,6 +200,10 @@ tctildr_get_tcti (const char *name,
         for (size_t j = 0; j < NAME_ARRAY_SIZE; ++j) {
             if (strcmp (name, tctis[i].names[j]))
                 continue;
+            if (tctis[i].disabled) {
+                LOG_DEBUG("Skipping disabled tcti %s", tctis[i].names[j]);
+                continue;
+            }
             LOG_DEBUG("initializing TCTI with name \"%s\"",
                       tctis[i].names[j]);
             rc = tcti_from_init (tctis[i].init, conf, tcti);

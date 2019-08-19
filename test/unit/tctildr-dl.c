@@ -625,6 +625,52 @@ test_tctildr_get_info_default (void **state)
     TSS2_RC rc = tctildr_get_info (NULL, &info, &data);
     assert_int_equal (rc, TSS2_TCTI_RC_GENERAL_FAILURE);
 }
+void
+test_tctildr_get_info_disable_enable_success (void **state)
+{
+    const TSS2_TCTI_INFO *info;
+    TSS2_RC rc;
+    void *data;
+
+    tctildr_disable_tcti("libtss2-tcti-default.so");
+
+    expect_string(__wrap_dlopen, filename, "libtss2-tcti-tabrmd.so.0");
+    expect_value(__wrap_dlopen, flags, RTLD_NOW);
+    will_return(__wrap_dlopen, HANDLE);
+
+    expect_value(__wrap_dlsym, handle, HANDLE);
+    expect_string(__wrap_dlsym, symbol, TSS2_TCTI_INFO_SYMBOL);
+    will_return(__wrap_dlsym, NULL);
+
+    expect_value(__wrap_dlclose, handle, HANDLE);
+    will_return(__wrap_dlclose, 0);
+
+    rc = tctildr_get_info (NULL, &info, &data);
+    assert_int_equal (rc, TSS2_TCTI_RC_GENERAL_FAILURE);
+
+    tctildr_enable_tcti("libtss2-tcti-default.so");
+
+    expect_string(__wrap_dlopen, filename, "libtss2-tcti-default.so");
+    expect_value(__wrap_dlopen, flags, RTLD_NOW);
+    will_return(__wrap_dlopen, HANDLE);
+
+    expect_value(__wrap_dlsym, handle, HANDLE);
+    expect_string(__wrap_dlsym, symbol, TSS2_TCTI_INFO_SYMBOL);
+    will_return(__wrap_dlsym, NULL);
+
+    expect_value(__wrap_dlclose, handle, HANDLE);
+    will_return(__wrap_dlclose, 0);
+
+    rc = tctildr_get_info (NULL, &info, &data);
+    assert_int_equal (rc, TSS2_TCTI_RC_GENERAL_FAILURE);
+}
+
+void
+test_tctildr_disable_tcti_fail (void **state)
+{
+    TSS2_RC rc= tctildr_disable_tcti("foo");
+    assert_int_equal(rc, TSS2_TCTI_RC_BAD_VALUE);
+}
 
 void
 test_finalize_data (void **state)
@@ -663,7 +709,9 @@ main(void)
         cmocka_unit_test(test_get_tcti_from_name),
         cmocka_unit_test(test_tctildr_get_info_from_name),
         cmocka_unit_test(test_tctildr_get_info_default),
+        cmocka_unit_test(test_tctildr_get_info_disable_enable_success),
 #endif
+        cmocka_unit_test(test_tctildr_disable_tcti_fail),
         cmocka_unit_test(test_info_from_name_null),
         cmocka_unit_test(test_info_from_name_handle_fail),
         cmocka_unit_test(test_info_from_name_info_fail),

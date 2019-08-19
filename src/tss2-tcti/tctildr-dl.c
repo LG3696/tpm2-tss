@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdbool.h>
 #include <inttypes.h>
 #include <dlfcn.h>
 #include <limits.h>
@@ -29,6 +30,7 @@ struct {
     char *file;
     char *conf;
     char *description;
+    bool disabled;
 } tctis[] = {
     {
         .file = "libtss2-tcti-default.so",
@@ -53,6 +55,37 @@ struct {
         .description = "Access to libtss2-tcti-mssim.so",
     },
 };
+
+static TSS2_RC
+tcti_set_disabled (const char *name, bool disable)
+{
+    for (size_t i = 0; i < ARRAY_SIZE(tctis); i++) {
+        if (strcmp (name, tctis[i].file) == 0) {
+            LOG_DEBUG ("%s standard TCTI: %s",
+                       disable ? "Disabling" : "Enabling",
+                       name);
+            tctis[i].disabled = disable;
+            return TSS2_RC_SUCCESS;
+        }
+    }
+
+    LOG_ERROR ("Failed to %s standard TCTI %s. No such standard TCTI.",
+               disable ? "disable" : "enable",
+               name);
+    return TSS2_TCTI_RC_BAD_VALUE;
+}
+
+TSS2_RC
+tctildr_disable_tcti (const char *name)
+{
+    return tcti_set_disabled (name, true);
+}
+
+TSS2_RC
+tctildr_enable_tcti (const char *name)
+{
+    return tcti_set_disabled (name, false);
+}
 
 const TSS2_TCTI_INFO*
 info_from_handle (void *dlhandle)
@@ -186,6 +219,10 @@ get_info_default (const TSS2_TCTI_INFO **info,
         return TSS2_TCTI_RC_IO_ERROR;
 #else
     for (size_t i = 0; i < ARRAY_SIZE(tctis); i++) {
+        if (tctis[i].disabled) {
+            LOG_DEBUG("Skipping disabled tcti %s", tctis[i].file);
+            continue;
+        }
         name = tctis[i].file;
         LOG_DEBUG("name: %s", name);
         if (name == NULL) {
@@ -239,6 +276,10 @@ tctildr_get_default (TSS2_TCTI_CONTEXT ** tcticontext, void **dlhandle)
     TSS2_RC r;
 
     for (size_t i = 0; i < ARRAY_SIZE(tctis); i++) {
+        if (tctis[i].disabled) {
+            LOG_DEBUG("Skipping disabled tcti %s", tctis[i].file);
+            continue;
+        }
         LOG_DEBUG("Attempting to connect using standard TCTI: %s",
                   tctis[i].description);
         r = tcti_from_file(tctis[i].file, tctis[i].conf, tcticontext,
