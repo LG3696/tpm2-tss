@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <setjmp.h>
 #include <cmocka.h>
@@ -21,6 +22,11 @@
 
 static TSS2_TCTI_CONTEXT_COMMON_V2 tcti_ctx = { 0, };
 static TSS2_TCTILDR_CONTEXT tctildr_ctx = { 0, };
+
+#define NAME_CONF_STR (char*)0xf100d
+#define EXCLUDE_STR (char*)0x71d8bb
+#define EXCLUDE_STR_GOOD_BAD ",good,bad,,"
+#define EXCLUDE_STR_TCTI_GOOD "good"
 
 TSS2_RC
 local_init (
@@ -40,6 +46,7 @@ tcti_from_init_null_init (void **state)
 }
 
 #define TEST_MAGIC_SIZE (size_t)5513444
+#define EXCLUDE_STR_SIZE (size_t)4515289
 #define TEST_INIT_RC_FAIL (TSS2_RC)0x6134
 void
 tcti_from_init_init_fail (void **state)
@@ -55,7 +62,8 @@ void* __real_calloc (size_t nmemb, size_t size);
 void*
 __wrap_calloc (size_t nmemb, size_t size)
 {
-    if (size == TEST_MAGIC_SIZE || size == sizeof (TSS2_TCTILDR_CONTEXT))
+    if (size == TEST_MAGIC_SIZE || size == sizeof (TSS2_TCTILDR_CONTEXT) ||
+        (nmemb == EXCLUDE_STR_SIZE + 1))
         return mock_type (void*);
     else
         return __real_calloc (nmemb, size);
@@ -67,6 +75,33 @@ __wrap_free (void *ptr)
     if (ptr != &tcti_ctx && ptr != &tctildr_ctx)
         __real_free (ptr);
     return;
+}
+
+TSS2_RC
+__wrap_tctildr_disable_tcti (const char *name)
+{
+    if (name == EXCLUDE_STR) {
+        return mock_type(TSS2_RC);
+    } else {
+        if (strcmp(name, EXCLUDE_STR_TCTI_GOOD) == 0) {
+            return TSS2_RC_SUCCESS;
+        } else {
+            return TSS2_TCTI_RC_BAD_VALUE;
+        }
+    }
+}
+TSS2_RC
+__wrap_tctildr_enable_tcti (const char *name)
+{
+    if (name == EXCLUDE_STR) {
+        return mock_type(TSS2_RC);
+    } else {
+        if (strcmp(name, EXCLUDE_STR_TCTI_GOOD) == 0) {
+            return TSS2_RC_SUCCESS;
+        } else {
+            return TSS2_TCTI_RC_BAD_VALUE;
+        }
+    }
 }
 TSS2_RC
 __wrap_tctildr_get_info (const char *name,
@@ -171,12 +206,11 @@ test_conf_parse_null (void **state)
     TSS2_RC rc = tctildr_conf_parse (NULL, NULL, NULL);
     assert_int_equal (rc, TSS2_TCTI_RC_BAD_REFERENCE);
 }
-#define NAME_CONF_STR (char*)0xf100d
 size_t __real_strlen (const char *s);
 size_t
 __wrap_strlen (const char *s)
 {
-    if (s != NAME_CONF_STR)
+    if (s != NAME_CONF_STR && s != EXCLUDE_STR)
         return __real_strlen (s);
     return mock_type (size_t);
 }
@@ -312,6 +346,75 @@ tctildr_init_ex_success_test (void **state)
     assert_int_equal (rc, TSS2_RC_SUCCESS);
 }
 static void
+tctildr_init_exclude_null_test (void **state)
+{
+    TSS2_RC rc;
+
+    rc = Tss2_TctiLdr_Initialize_Exclude(NULL, NULL, NULL);
+    assert_int_equal (rc, TSS2_TCTI_RC_BAD_VALUE);
+}
+static void
+tctildr_init_exclude_conf_fail_test (void **state)
+{
+    TSS2_RC rc;
+
+    will_return (__wrap_strlen, PATH_MAX);
+    rc = Tss2_TctiLdr_Initialize_Exclude (NAME_CONF_STR, NULL, NULL);
+    assert_int_equal (rc, TSS2_TCTI_RC_BAD_VALUE);
+}
+static void
+tctildr_init_exclude_calloc_fail_test (void **state)
+{
+    TSS2_RC rc;
+
+    will_return (__wrap_strlen, EXCLUDE_STR_SIZE);
+    will_return (__wrap_calloc, NULL);
+    rc = Tss2_TctiLdr_Initialize_Exclude (NULL, NULL, EXCLUDE_STR);
+    assert_int_equal (rc, TSS2_TCTI_RC_MEMORY);
+}
+static void
+tctildr_init_exclude_disable_enable_tcti_test (void **state)
+{
+    TSS2_RC rc;
+    TSS2_TCTI_CONTEXT *ctx;
+
+    will_return (__wrap_tctildr_get_tcti, TSS2_RC_SUCCESS);
+    will_return (__wrap_tctildr_get_tcti, &tcti_ctx);
+    will_return (__wrap_tctildr_get_tcti, TEST_TCTI_HANDLE);
+    will_return (__wrap_calloc, &tctildr_ctx);
+
+    rc = Tss2_TctiLdr_Initialize_Exclude (NULL, &ctx, EXCLUDE_STR_GOOD_BAD);
+    assert_int_equal (rc, TSS2_RC_SUCCESS);
+}
+static void
+tctildr_init_exclude_exclude_null_test (void **state)
+{
+    TSS2_RC rc;
+    TSS2_TCTI_CONTEXT *ctx;
+
+    will_return (__wrap_tctildr_get_tcti, TSS2_RC_SUCCESS);
+    will_return (__wrap_tctildr_get_tcti, &tcti_ctx);
+    will_return (__wrap_tctildr_get_tcti, TEST_TCTI_HANDLE);
+    will_return (__wrap_calloc, &tctildr_ctx);
+
+    rc = Tss2_TctiLdr_Initialize_Exclude (NULL, &ctx, NULL);
+    assert_int_equal (rc, TSS2_RC_SUCCESS);
+}
+static void
+tctildr_init_exclude_exclude_empty_test (void **state)
+{
+    TSS2_RC rc;
+    TSS2_TCTI_CONTEXT *ctx;
+
+    will_return (__wrap_tctildr_get_tcti, TSS2_RC_SUCCESS);
+    will_return (__wrap_tctildr_get_tcti, &tcti_ctx);
+    will_return (__wrap_tctildr_get_tcti, TEST_TCTI_HANDLE);
+    will_return (__wrap_calloc, &tctildr_ctx);
+
+    rc = Tss2_TctiLdr_Initialize_Exclude (NULL, &ctx, "");
+    assert_int_equal (rc, TSS2_RC_SUCCESS);
+}
+static void
 tctildr_finalize_null_ref_test (void **state)
 {
     Tss2_TctiLdr_Finalize (NULL);
@@ -362,6 +465,14 @@ main(void)
         cmocka_unit_test (tctildr_init_ex_from_file_fail),
         cmocka_unit_test (tctildr_init_ex_calloc_fail_test),
         cmocka_unit_test (tctildr_init_ex_success_test),
+
+        cmocka_unit_test (tctildr_init_exclude_null_test),
+        cmocka_unit_test (tctildr_init_exclude_conf_fail_test),
+        cmocka_unit_test (tctildr_init_exclude_calloc_fail_test),
+        cmocka_unit_test (tctildr_init_exclude_disable_enable_tcti_test),
+        cmocka_unit_test (tctildr_init_exclude_exclude_null_test),
+        cmocka_unit_test (tctildr_init_exclude_exclude_empty_test),
+
         cmocka_unit_test (tctildr_finalize_null_ref_test),
         cmocka_unit_test (tctildr_finalize_null_ctx_test),
         cmocka_unit_test (tctildr_finalize_test),

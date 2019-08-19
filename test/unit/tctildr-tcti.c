@@ -25,6 +25,16 @@
 
 #define UNUSED(var) (void)(var)
 TSS2_RC
+__wrap_tctildr_disable_tcti (const char *name)
+{
+    return TSS2_RC_SUCCESS;
+}
+TSS2_RC
+__wrap_tctildr_enable_tcti (const char *name)
+{
+    return TSS2_RC_SUCCESS;
+}
+TSS2_RC
 __wrap_tctildr_get_info (const char *name,
                          const TSS2_TCTI_INFO **info,
                          void **data)

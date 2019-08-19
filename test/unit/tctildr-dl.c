@@ -305,6 +305,36 @@ test_tcti_default(void **state)
     r = tctildr_get_default(&tcti, &handle);
     assert_int_equal(r, TSS2_RC_SUCCESS);
 }
+static void
+test_tcti_default_disable_enable_success(void **state)
+{
+    TSS2_TCTI_CONTEXT *tcti;
+    TSS2_RC rc;
+
+    rc = tctildr_disable_tcti("libtss2-tcti-default.so");
+    assert_int_equal(rc, TSS2_RC_SUCCESS);
+
+    expect_string(__wrap_dlopen, filename, "libtss2-tcti-tabrmd.so.0");
+    expect_value(__wrap_dlopen, flags, RTLD_NOW);
+    will_return(__wrap_dlopen, HANDLE);
+
+    expect_value(__wrap_dlsym, handle, HANDLE);
+    expect_string(__wrap_dlsym, symbol, TSS2_TCTI_INFO_SYMBOL);
+    will_return(__wrap_dlsym, &__wrap_Tss2_Tcti_Fake_Info);
+
+    expect_value(__wrap_tcti_from_info, infof, __wrap_Tss2_Tcti_Fake_Info);
+    expect_value(__wrap_tcti_from_info, conf, NULL);
+    expect_value(__wrap_tcti_from_info, tcti, &tcti);
+    will_return(__wrap_tcti_from_info, &tcti_instance);
+    will_return(__wrap_tcti_from_info, TSS2_RC_SUCCESS);
+
+    void *handle = NULL;
+    rc = tctildr_get_default(&tcti, &handle);
+    assert_int_equal(rc, TSS2_RC_SUCCESS);
+
+    rc = tctildr_enable_tcti("libtss2-tcti-default.so");
+    assert_int_equal(rc, TSS2_RC_SUCCESS);
+}
 
 /** Test for failure on tcti
  * { "libtss2-tcti-default.so", NULL, "", "Access libtss2-tcti-default.so" }
@@ -625,6 +655,54 @@ test_tctildr_get_info_default (void **state)
     TSS2_RC rc = tctildr_get_info (NULL, &info, &data);
     assert_int_equal (rc, TSS2_TCTI_RC_GENERAL_FAILURE);
 }
+void
+test_tctildr_get_info_disable_enable_success (void **state)
+{
+    const TSS2_TCTI_INFO *info;
+    TSS2_RC rc;
+    void *data;
+
+    rc = tctildr_disable_tcti("libtss2-tcti-default.so");
+    assert_int_equal(rc, TSS2_RC_SUCCESS);
+
+    expect_string(__wrap_dlopen, filename, "libtss2-tcti-tabrmd.so.0");
+    expect_value(__wrap_dlopen, flags, RTLD_NOW);
+    will_return(__wrap_dlopen, HANDLE);
+
+    expect_value(__wrap_dlsym, handle, HANDLE);
+    expect_string(__wrap_dlsym, symbol, TSS2_TCTI_INFO_SYMBOL);
+    will_return(__wrap_dlsym, NULL);
+
+    expect_value(__wrap_dlclose, handle, HANDLE);
+    will_return(__wrap_dlclose, 0);
+
+    rc = tctildr_get_info (NULL, &info, &data);
+    assert_int_equal (rc, TSS2_TCTI_RC_GENERAL_FAILURE);
+
+    rc = tctildr_enable_tcti("libtss2-tcti-default.so");
+    assert_int_equal(rc, TSS2_RC_SUCCESS);
+
+    expect_string(__wrap_dlopen, filename, "libtss2-tcti-default.so");
+    expect_value(__wrap_dlopen, flags, RTLD_NOW);
+    will_return(__wrap_dlopen, HANDLE);
+
+    expect_value(__wrap_dlsym, handle, HANDLE);
+    expect_string(__wrap_dlsym, symbol, TSS2_TCTI_INFO_SYMBOL);
+    will_return(__wrap_dlsym, NULL);
+
+    expect_value(__wrap_dlclose, handle, HANDLE);
+    will_return(__wrap_dlclose, 0);
+
+    rc = tctildr_get_info (NULL, &info, &data);
+    assert_int_equal (rc, TSS2_TCTI_RC_GENERAL_FAILURE);
+}
+
+void
+test_tctildr_disable_tcti_fail (void **state)
+{
+    TSS2_RC rc = tctildr_disable_tcti("foo");
+    assert_int_equal(rc, TSS2_TCTI_RC_BAD_VALUE);
+}
 
 void
 test_finalize_data (void **state)
@@ -655,6 +733,7 @@ main(void)
         cmocka_unit_test(test_get_info_default_success),
         cmocka_unit_test(test_get_info_default_info_fail),
         cmocka_unit_test(test_tcti_default),
+        cmocka_unit_test(test_tcti_default_disable_enable_success),
         cmocka_unit_test(test_tcti_default_fail_sym),
         cmocka_unit_test(test_tcti_default_fail_info),
         cmocka_unit_test(test_tcti_fail_all),
@@ -663,7 +742,9 @@ main(void)
         cmocka_unit_test(test_get_tcti_from_name),
         cmocka_unit_test(test_tctildr_get_info_from_name),
         cmocka_unit_test(test_tctildr_get_info_default),
+        cmocka_unit_test(test_tctildr_get_info_disable_enable_success),
 #endif
+        cmocka_unit_test(test_tctildr_disable_tcti_fail),
         cmocka_unit_test(test_info_from_name_null),
         cmocka_unit_test(test_info_from_name_handle_fail),
         cmocka_unit_test(test_info_from_name_info_fail),

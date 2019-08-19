@@ -93,6 +93,21 @@ test_get_tcti_default_success (void **state)
     assert_ptr_equal (tcti_ctx, &test_ctx);
 }
 void
+test_get_tcti_default_disable_enable_fail (void **state)
+{
+    TSS2_RC rc;
+    TSS2_TCTI_CONTEXT *tcti_ctx = NULL;
+
+    tctildr_disable_tcti("tbs");
+    tctildr_disable_tcti("device");
+    tctildr_disable_tcti("mssim");
+    rc = tctildr_get_tcti (NULL, NULL, &tcti_ctx, NULL);
+    assert_int_equal (rc, TSS2_TCTI_RC_IO_ERROR);
+    tctildr_enable_tcti("tbs");
+    tctildr_enable_tcti("device");
+    tctildr_enable_tcti("mssim");
+}
+void
 test_get_tcti_match_second (void **state)
 {
     TSS2_RC rc;
@@ -112,7 +127,13 @@ test_get_tcti_match_none (void **state)
 
     rc = tctildr_get_tcti ("foo", NULL, &tcti_ctx, NULL);
     assert_int_equal (rc, TSS2_TCTI_RC_IO_ERROR);
- }
+}
+void
+test_tctildr_disable_tcti_fail (void **state)
+{
+    TSS2_RC rc= tctildr_disable_tcti("foo");
+    assert_int_equal(rc, TSS2_TCTI_RC_BAD_VALUE);
+}
 void
 test_finalize_data (void **state)
 {
@@ -132,8 +153,10 @@ main(void)
         cmocka_unit_test (test_tctildr_get_default_all_fail),
         cmocka_unit_test (test_get_tcti_null_tcti),
         cmocka_unit_test (test_get_tcti_default_success),
+        cmocka_unit_test (test_get_tcti_default_disable_enable_fail),
         cmocka_unit_test (test_get_tcti_match_second),
         cmocka_unit_test (test_get_tcti_match_none),
+        cmocka_unit_test (test_tctildr_disable_tcti_fail),
         cmocka_unit_test (test_finalize_data),
         cmocka_unit_test (test_get_info),
     };

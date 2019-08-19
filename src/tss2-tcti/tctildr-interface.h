@@ -10,6 +10,10 @@
 #include "tss2_tcti.h"
 
 TSS2_RC
+tctildr_disable_tcti (const char *name);
+TSS2_RC
+tctildr_enable_tcti (const char *name);
+TSS2_RC
 tctildr_get_tcti (const char *name,
                   const char* conf,
                   TSS2_TCTI_CONTEXT **tcti,
