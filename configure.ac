@@ -15,7 +15,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) #Backward compatible setti
 
 AC_CONFIG_HEADERS([config.h])
 
-AC_CONFIG_FILES([Makefile Doxyfile lib/tss2-sys.pc lib/tss2-esys.pc lib/tss2-mu.pc lib/tss2-tcti-device.pc lib/tss2-tcti-mssim.pc lib/tss2-rc.pc lib/tss2-tctildr.pc])
+AC_CONFIG_FILES([Makefile Doxyfile lib/tss2-sys.pc lib/tss2-esys.pc lib/tss2-mu.pc lib/tss2-tcti-debug.pc lib/tss2-tcti-device.pc lib/tss2-tcti-mssim.pc lib/tss2-rc.pc lib/tss2-tctildr.pc])
 
 # propagate configure arguments to distcheck
 AC_SUBST([DISTCHECK_CONFIGURE_FLAGS],[$ac_configure_args])
@@ -122,6 +122,13 @@ AC_ARG_WITH([tctidefaultconfig],
                                 ["$with_tctidefaultconfig"],
                                 ["The default TCTIs configuration string"])])
 
+AC_ARG_ENABLE([tcti-debug],
+            [AS_HELP_STRING([--enable-tcti-debug],
+                            [build the tcti-debug module (default is no)])],
+            [enable_tcti_debug=yes])
+AM_CONDITIONAL([ENABLE_TCTI_DEBUG], [test "x$enable_tcti_debug" != xno])
+AS_IF([test "x$enable_tcti_debug" = "xyes"],
+	AC_DEFINE([TCTI_DEBUG],[1], [TCTI FOR DEBUGGING]))
 AC_ARG_ENABLE([tcti-device],
             [AS_HELP_STRING([--disable-tcti-device],
                             [don't build the tcti-device module])],,

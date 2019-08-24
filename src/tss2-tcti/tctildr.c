@@ -108,6 +108,9 @@ tcti_from_info (TSS2_TCTI_INFO_FUNC infof,
  * - ":tcti-conf" -> tcti-conf copied to 'conf', 'name' unchanged
  * - "tcti-name:tcti-conf" - "tcti-name" copied to 'name', "tcti-conf"
  *   copied to 'conf'
+ * - "tcti-name:tcti-conf0:tcti-conf1" - "tcti-name" copied to 'name',
+ *  "tcti-conf"
+ *   copied to 'conf'
  */
 TSS2_RC
 tctildr_conf_parse (const char *name_conf,

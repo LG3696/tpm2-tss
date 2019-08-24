@@ -276,6 +276,24 @@ src_tss2_tcti_libtss2_tctildr_la_LIBADD += $(LIBADD_DL)
 src_tss2_tcti_libtss2_tctildr_la_SOURCES += src/tss2-tcti/tctildr-dl.c src/tss2-tcti/tctildr-dl.h
 endif
 
+# tcti debug library
+if ENABLE_TCTI_DEBUG
+libtss2_tcti_debug = src/tss2-tcti/libtss2-tcti-debug.la
+tss2_HEADERS += $(srcdir)/include/tss2/tss2_tcti_debug.h
+lib_LTLIBRARIES += $(libtss2_tcti_debug)
+pkgconfig_DATA += lib/tss2-tcti-debug.pc
+EXTRA_DIST += lib/tss2-tcti-debug.map # joho TODO enable tcti-debug for Win (.def, visual studio files
+
+if HAVE_LD_VERSION_SCRIPT
+src_tss2_tcti_libtss2_tcti_debug_la_LDFLAGS  = -Wl,--version-script=$(srcdir)/lib/tss2-tcti-debug.map
+endif # HAVE_LD_VERSION_SCRIPT
+src_tss2_tcti_libtss2_tcti_debug_la_LIBADD   = $(libtss2_tctildr) $(libtss2_mu) $(libutil)
+src_tss2_tcti_libtss2_tcti_debug_la_SOURCES  = \
+    src/tss2-tcti/tcti-common.c \
+    src/tss2-tcti/tcti-debug-pcap.c \
+    src/tss2-tcti/tcti-debug.c
+endif # ENABLE_TCTI_DEBUG
+
 # tcti device library
 if ENABLE_TCTI_DEVICE
 libtss2_tcti_device = src/tss2-tcti/libtss2-tcti-device.la
@@ -440,6 +458,7 @@ EXTRA_DIST += \
     man/Tss2_TctiLdr_FreeInfo.3.in \
     man/Tss2_TctiLdr_GetInfo.3.in \
     man/Tss2_TctiLdr_Initialize.3.in \
+    man/tss2-tcti-debug.7.in \
     man/tss2-tcti-device.7.in \
     man/tss2-tcti-mssim.7.in \
     man/tss2-tctildr.7.in

@@ -62,6 +62,10 @@ test_tctildr_get_default_all_fail (void **state)
     TSS2_TCTI_CONTEXT *tcti_ctx = NULL;
 
 #define TEST_RC 0x65203563
+#ifdef TCTI_DEBUG
+    will_return (__wrap_tcti_from_init, tcti_ctx);
+    will_return (__wrap_tcti_from_init, TEST_RC);
+#endif /* TCTI_DEBUG */
     will_return (__wrap_tcti_from_init, tcti_ctx);
     will_return (__wrap_tcti_from_init, TEST_RC);
     will_return (__wrap_tcti_from_init, tcti_ctx);
@@ -98,11 +102,17 @@ test_get_tcti_default_disable_enable_fail (void **state)
     TSS2_RC rc;
     TSS2_TCTI_CONTEXT *tcti_ctx = NULL;
 
+#ifdef TCTI_DEBUG
+    tctildr_disable_tcti("debug");
+#endif /* TCTI_DEBUG */
     tctildr_disable_tcti("tbs");
     tctildr_disable_tcti("device");
     tctildr_disable_tcti("mssim");
     rc = tctildr_get_tcti (NULL, NULL, &tcti_ctx, NULL);
     assert_int_equal (rc, TSS2_TCTI_RC_IO_ERROR);
+#ifdef TCTI_DEBUG
+    tctildr_enable_tcti("debug");
+#endif /* TCTI_DEBUG */
     tctildr_enable_tcti("tbs");
     tctildr_enable_tcti("device");
     tctildr_enable_tcti("mssim");

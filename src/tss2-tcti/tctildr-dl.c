@@ -32,6 +32,12 @@ struct {
     char *description;
     bool disabled;
 } tctis[] = {
+#ifdef TCTI_DEBUG
+    {
+        .file = "libtss2-tcti-debug.so",
+        .description = "Access libtss2-tcti-debug.so",
+    },
+#endif /* TCTI_DEBUG */
     {
         .file = "libtss2-tcti-default.so",
         .description = "Access libtss2-tcti-default.so",

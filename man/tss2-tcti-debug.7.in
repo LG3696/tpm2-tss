@@ -1,0 +1,11 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH TCTI-DEBUG 8 "August 2019" "TPM2 Software Stack"
+.SH NAME
+tcti-debug \- Debugging module with pcapng output
+.SH SYNOPSIS
+A TPM Command Transmission Interface (TCTI) module for logging the TPM
+commands transmitted and received in pcapng format.
+.SH DESCRIPTION
+tcti-debug is ... joho //TODO

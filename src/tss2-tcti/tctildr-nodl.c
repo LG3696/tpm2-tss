@@ -41,6 +41,9 @@
 
 #include "tctildr.h"
 #include "tss2_tcti_mssim.h"
+#ifdef TCTI_DEBUG
+#include "tss2_tcti_debug.h"
+#endif /* TCTI_DEBUG */
 #ifdef _WIN32
 #include "tss2_tcti_tbs.h"
 #else /* _WIN32 */
@@ -59,6 +62,17 @@ struct {
     char *description;
     bool disabled;
 } tctis [] = {
+#ifdef TCTI_DEBUG
+    {
+        .names = {
+            "libtss2-tcti-debug.so.0",
+            "libtss2-tcti-debug.so",
+            "debug",
+        },
+        .init = Tss2_Tcti_Debug_Init,
+        .description = "Access to debugging TCTI",
+    },
+#endif /* TCTI_DEBUG */
 #ifdef _WIN32
     {
         .names = {
