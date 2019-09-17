@@ -10,8 +10,8 @@
 #include <stdint.h>
 
 /* Default TCTI */
-#define TCTI_DEFAULT      SOCKET_TCTI
-#define TCTI_DEFAULT_STR  "socket"
+#define TCTI_DEFAULT      LIBTPMS_TCTI
+#define TCTI_DEFAULT_STR  "libtpms"
 
 /* Defaults for Device TCTI */
 #define DEVICE_PATH_DEFAULT "/dev/tpm0"
@@ -29,6 +29,7 @@
 typedef enum {
     UNKNOWN_TCTI,
     DEVICE_TCTI,
+    LIBTPMS_TCTI,
     SOCKET_TCTI,
     FUZZING_TCTI,
     N_TCTI,

@@ -15,7 +15,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) #Backward compatible setti
 
 AC_CONFIG_HEADERS([config.h])
 
-AC_CONFIG_FILES([Makefile Doxyfile lib/tss2-sys.pc lib/tss2-esys.pc lib/tss2-mu.pc lib/tss2-tcti-device.pc lib/tss2-tcti-mssim.pc lib/tss2-rc.pc lib/tss2-tctildr.pc])
+AC_CONFIG_FILES([Makefile Doxyfile lib/tss2-sys.pc lib/tss2-esys.pc lib/tss2-mu.pc lib/tss2-tcti-device.pc lib/tss2-tcti-mssim.pc lib/tss2-tcti-libtpms.pc lib/tss2-rc.pc lib/tss2-tctildr.pc])
 
 # propagate configure arguments to distcheck
 AC_SUBST([DISTCHECK_CONFIGURE_FLAGS],[$ac_configure_args])
@@ -138,6 +138,15 @@ AM_CONDITIONAL([ENABLE_TCTI_MSSIM], [test "x$enable_tcti_mssim" != xno])
 AS_IF([test "x$enable_tcti_mssim" = "xyes"],
 	AC_DEFINE([TCTI_MSSIM],[1], [TCTI FOR MS SIMULATOR]))
 
+AC_ARG_ENABLE([tcti-libtpms],
+            [AS_HELP_STRING([--disable-tcti-libtpms],
+                            [don't build the tcti-libtpms module])],
+            [enable_tcti_libtpms=$enableval],
+            [enable_tcti_libtpms=yes])
+AM_CONDITIONAL([ENABLE_TCTI_LIBTPMS], [test "x$enable_tcti_libtpms" != xno])
+AS_IF([test "x$enable_tcti_libtpms" = "xyes"],
+	AC_DEFINE([TCTI_LIBTPMS],[1], [TCTI FOR TPM SIMULATOR]))
+
 AC_ARG_ENABLE([tcti-fuzzing],
             [AS_HELP_STRING([--enable-tcti-fuzzing],
                             [build the tcti-fuzzing module])],,
@@ -175,8 +184,7 @@ AC_ARG_ENABLE([integration],
         [build and execute integration tests])],,
     [enable_integration=no])
 AS_IF([test "x$enable_integration" = "xyes"],
-      [ERROR_IF_NO_PROG([tpm_server])
-       ERROR_IF_NO_PROG([ss])
+      [ERROR_IF_NO_PROG([ss])
        ERROR_IF_NO_PROG([ps])
        ERROR_IF_NO_PROG([echo])
        ERROR_IF_NO_PROG([kill])
@@ -196,8 +204,8 @@ AS_IF([test "x$enable_integration" = "xyes"],
        AS_IF([test "x$with_crypto" != xossl -o "x$enable_esapi" != xyes],
            PKG_CHECK_MODULES([LIBCRYPTO],[libcrypto]))
        AC_CHECK_HEADER(uthash.h, [], [AC_MSG_ERROR([Can not find uthash.h. Please install uthash-dev])])
-       AS_IF([test "x$enable_tcti_mssim" = xno],
-              AC_MSG_ERROR([Integration tests can not be enabled without the TCTI_MSSIM module]))
+       AS_IF([test \( "x$enable_tcti_mssim" = xno \) -a \( "x$enable_tcti_libtpms" = xno \)],
+              AC_MSG_ERROR([Integration tests can not be enabled without the TCTI_MSSIM or TCTI_LIBTPMS module]))
        AC_SUBST([ENABLE_INTEGRATION], [$enable_integration])])
 AM_CONDITIONAL([ENABLE_INTEGRATION],[test "x$enable_integration" = "xyes"])
 #
@@ -369,15 +377,18 @@ m4_ifdef([_AX_CODE_COVERAGE_RULES],
 AX_ADD_AM_MACRO_STATIC([])
 
 AM_COND_IF([ENABLE_TCTI_DEVICE], [],
-           [AM_COND_IF([ENABLE_TCTI_MSSIM], [],
-                       [AM_COND_IF([ENABLE_TCTI_FUZZING], [],
-                                   [AC_MSG_WARN("No build-in TCTI module enabled")])])])
+           [AM_COND_IF([ENABLE_TCTI_LIBTPMS], [],
+                       [AM_COND_IF([ENABLE_TCTI_MSSIM], [],
+                                   [AM_COND_IF([ENABLE_TCTI_FUZZING], [],
+                                               [AC_MSG_WARN("No build-in TCTI module enabled")])])])])
 
 AM_COND_IF([ENABLE_TCTI_FUZZING], [
             AM_COND_IF([ENABLE_TCTI_DEVICE],
-                       AC_MSG_ERROR([Fuzzing TCTI is meant to be built as the only TCTI: use --disable-tcti-device --disable-tcti-mssim]))
+                       AC_MSG_ERROR([Fuzzing TCTI is meant to be built as the only TCTI: use --disable-tcti-device --disable-tcti-libtpms --disable-tcti-mssim]))
+            AM_COND_IF([ENABLE_TCTI_LIBTPMS],
+                       AC_MSG_ERROR([Fuzzing TCTI is meant to be built as the only TCTI: use --disable-tcti-device --disable-tcti-libtpms --disable-tcti-mssim]))
             AM_COND_IF([ENABLE_TCTI_MSSIM],
-                       AC_MSG_ERROR([Fuzzing TCTI is meant to be built as the only TCTI: use --disable-tcti-device --disable-tcti-mssim]))
+                       AC_MSG_ERROR([Fuzzing TCTI is meant to be built as the only TCTI: use --disable-tcti-device --disable-tcti-libtpms --disable-tcti-mssim]))
             AS_IF([test "x$CC" != "xclang"],
                        AC_MSG_ERROR("Fuzzing TCTI can only be used with clang"), [])
             ], [])

@@ -16,9 +16,9 @@ if TESTPTPM
 INT_LOG_COMPILER = $(srcdir)/script/int-log-compiler-ptpm.sh
 INT_LOG_FLAGS = --ptpm=$(PTPM)
 else
-INT_LOG_COMPILER = $(srcdir)/script/int-log-compiler.sh
+INT_LOG_COMPILER = $(srcdir)/script/int-log-compiler-libtpms.sh
 endif
-EXTRA_DIST += $(srcdir)/script/int-log-compiler.sh $(srcdir)/script/int-log-compiler-ptpm.sh
+EXTRA_DIST += $(srcdir)/script/int-log-compiler-libtpms.sh $(srcdir)/script/int-log-compiler-ptpm.sh
 AM_TESTS_ENVIRONMENT = PATH="$(PATH)"
 
 check-programs: $(check_PROGRAMS)
@@ -412,7 +412,7 @@ endif # UNIT
 
 if ENABLE_INTEGRATION
 test_tpmclient_tpmclient_int_CFLAGS   = $(AM_CFLAGS) -U_FORTIFY_SOURCE  $(TESTS_CFLAGS)
-test_tpmclient_tpmclient_int_LDADD    = $(TESTS_LDADD)
+test_tpmclient_tpmclient_int_LDADD    = $(TESTS_LDADD) -ltpms
 test_tpmclient_tpmclient_int_SOURCES  = \
     test/tpmclient/tpmclient.int.c test/integration/main-sapi.c
 

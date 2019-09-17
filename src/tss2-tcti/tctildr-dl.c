@@ -49,6 +49,10 @@ struct {
         .description = "Access libtss2-tcti-device.s0 with /dev/tpmrm0",
     },
     {
+        .file = "libtss2-tcti-libtpms.so.0",
+        .description = "Access to libtss2-tcti-libtpms.so",
+    },
+    {
         .file = "libtss2-tcti-mssim.so.0",
         .description = "Access to libtss2-tcti-mssim.so",
     },

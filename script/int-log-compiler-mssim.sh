@@ -37,7 +37,7 @@ print_usage ()
 {
     cat <<END
 Usage:
-    int-log-compiler.sh TEST-SCRIPT [TEST-SCRIPT-ARGUMENTS]
+    int-log-compiler-mssim.sh TEST-SCRIPT [TEST-SCRIPT-ARGUMENTS]
 END
 }
 while test $# -gt 0; do

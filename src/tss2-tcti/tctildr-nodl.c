@@ -40,6 +40,7 @@
 
 #include "tctildr.h"
 #include "tss2_tcti_mssim.h"
+#include "tss2_tcti_libtpms.h"
 #ifdef _WIN32
 #include "tss2_tcti_tbs.h"
 #else /* _WIN32 */
@@ -102,6 +103,17 @@ struct {
     },
 #endif /* TCTI_DEVICE */
 #endif /* _WIN32 */
+#ifdef TCTI_LIBTPMS
+    {
+        .names = {
+            "libtss2-tcti-libtpms.so.0",
+            "libtss2-tcti-libtpms.so",
+            "libtpms",
+        },
+        .init = Tss2_Tcti_Libtpms_Init,
+        .description = "Access to TPM softwate simulator",
+    },
+#endif /* TCTI_LIBTPMS */
 #ifdef TCTI_MSSIM
     {
         .names = {

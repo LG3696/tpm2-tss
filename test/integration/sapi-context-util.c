@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "tss2_tcti_device.h"
+#include "tss2_tcti_libtpms.h"
 #include "tss2_tcti_mssim.h"
 #ifdef TCTI_FUZZING
 #include "tss2_tcti_fuzzing.h"
@@ -57,6 +58,41 @@ tcti_device_init(char const *device_path)
     return tcti_ctx;
 }
 #endif /* TCTI_DEVICE */
+
+#ifdef TCTI_LIBTPMS
+/*
+ * Initialize a socket TCTI instance using the provided options structure.
+ * The caller is returned a TCTI context structure that is allocated by this
+ * function. This structure must be freed by the caller.
+ */
+TSS2_TCTI_CONTEXT *
+tcti_libtpms_init(void)
+{
+    size_t size;
+    TSS2_RC rc;
+    TSS2_TCTI_CONTEXT *tcti_ctx;
+
+    rc = Tss2_Tcti_Libtpms_Init(NULL, &size, NULL);
+    if (rc != TSS2_RC_SUCCESS) {
+        fprintf(stderr, "Faled to get allocation size for tcti context: "
+                "0x%x\n", rc);
+        return NULL;
+    }
+    tcti_ctx = (TSS2_TCTI_CONTEXT *) calloc(1, size);
+    if (tcti_ctx == NULL) {
+        fprintf(stderr, "Allocation for tcti context failed: %s\n",
+                strerror(errno));
+        return NULL;
+    }
+    rc = Tss2_Tcti_Libtpms_Init(tcti_ctx, &size, NULL);
+    if (rc != TSS2_RC_SUCCESS) {
+        fprintf(stderr, "Failed to initialize tcti context: 0x%x\n", rc);
+        free(tcti_ctx);
+        return NULL;
+    }
+    return tcti_ctx;
+}
+#endif /* TCTI_LIBTPMS */
 
 #ifdef TCTI_MSSIM
 /*
@@ -198,6 +234,10 @@ tcti_init_from_opts(test_opts_t * options)
     case DEVICE_TCTI:
         return tcti_device_init(options->device_file);
 #endif /* TCTI_DEVICE */
+#ifdef TCTI_LIBTPMS
+    case LIBTPMS_TCTI:
+        return tcti_libtpms_init();
+#endif /* TCTI_LIBTPMS */
 #ifdef TCTI_MSSIM
     case SOCKET_TCTI:
         return tcti_socket_init(options->socket_address, options->socket_port);

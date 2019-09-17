@@ -303,6 +303,11 @@ test_invoke (TSS2_SYS_CONTEXT *sys_ctx)
     goto_if_error (rc, "nv_read_test", teardown);
 teardown:
     rc_teardown = teardown_nv (sys_ctx);
+    if (rc == TSS2_TCTI_RC_NOT_IMPLEMENTED) {
+        /* Tss2_Tcti_SetLocality returned TSS2_TCTI_RC_NOT_IMPLEMENTED */
+        LOG_DEBUG("tcti_context not suitable for command! Skipping test");
+        exit(77);
+    }
     return_if_error (rc, "NV policy locality test failed");
     return_if_error (rc_teardown, "teardown_nv");
 

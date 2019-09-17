@@ -32,6 +32,10 @@ tcti_map_entry_t tcti_map_table[] = {
      .type = DEVICE_TCTI,
      },
     {
+     .name = "libtpms",
+     .type = LIBTPMS_TCTI,
+     },
+    {
      .name = "socket",
      .type = SOCKET_TCTI,
      },
@@ -86,6 +90,8 @@ sanity_check_test_opts(test_opts_t * opts)
             fprintf(stderr, "device-path is NULL, check env\n");
             return 1;
         }
+        break;
+    case LIBTPMS_TCTI:
         break;
     case SOCKET_TCTI:
         if (opts->socket_address == NULL || opts->socket_port == 0) {

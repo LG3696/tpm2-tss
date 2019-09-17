@@ -18,10 +18,10 @@ following sections describe them for the supported platforms.
 
 The following are dependencies only required when building test suites.
 * Integration test suite (see ./configure option --enable-integration):
-    - uthash development libraries and header files
+    - uthash development libraries and header files)
+    - libtpms library and header files (from https://github.com/stefanberger/libtpms)
     - ps executable (usually in the procps package)
     - ss executable (usually in the iproute2 package)
-    - tpm_server executable (from https://sourceforge.net/projects/ibmswtpm2/)
 * Unit test suite (see ./configure option --enable-unit):
     - cmocka unit test framework, version >= 1.0
 * Code coverage analysis:

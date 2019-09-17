@@ -16,8 +16,8 @@
 #include <string.h>
 
 #include "tss2_sys.h"
-#include "tss2_tcti_device.h"
-#include "tss2_tcti_mssim.h"
+#include "tss2_tcti_libtpms.h"
+#include "libtpms/tpm_library.h"
 
 #include "../integration/context-util.h"
 #include "../integration/sapi-util.h"
@@ -99,7 +99,7 @@ static void ErrorHandler(UINT32 rval, char *errorString, int errorStringSize)
 static void Cleanup()
 {
     if (resMgrTctiContext != NULL) {
-        tcti_platform_command(resMgrTctiContext, MS_SIM_POWER_OFF);
+        TPMLIB_Terminate();
         tcti_teardown(resMgrTctiContext);
         resMgrTctiContext = NULL;
     }
@@ -142,14 +142,16 @@ static void InitSysContextFailure()
 
 static TSS2_RC TpmReset()
 {
-    TSS2_RC rval = TSS2_RC_SUCCESS;
+    TPM_RESULT rval;
 
-    rval = (TSS2_RC)tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    if( rval == TSS2_RC_SUCCESS )
+    TPMLIB_Terminate();
+    rval = TPMLIB_MainInit();
+    if( rval != TPM2_RC_SUCCESS )
     {
-        rval = (TSS2_RC)tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
+        return TSS2_TCTI_RC_IO_ERROR;
     }
-    return rval;
+
+    return TSS2_RC_SUCCESS;
 }
 
 static void TestDictionaryAttackLockReset()
@@ -193,9 +195,7 @@ static void TestTpmStartup()
 
 
     /* Cycle power using simulator interface. */
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    CheckPassed( rval );
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
+    rval = TpmReset();
     CheckPassed( rval );
 
 
@@ -210,9 +210,7 @@ static void TestTpmStartup()
     CheckPassed( rval );
 
     /* Cycle power using simulator interface. */
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    CheckPassed( rval );
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
+    rval = TpmReset();
     CheckPassed( rval );
 
 
@@ -854,12 +852,31 @@ static void TestHierarchyControl()
     rval = Tss2_Sys_Startup ( sysContext, TPM2_SU_CLEAR );
     CheckPassed( rval );
 
+    // TPMI_YES_NO moreData;
+    // TPMS_CAPABILITY_DATA capabilityData;
+    // Tss2_Sys_GetCapability(sysContext, NULL, TPM2_CAP_HANDLES, TPM2_HT_NV_INDEX, 3, &moreData, &capabilityData, NULL);
+    // uint32_t val0 = BE_TO_HOST_32(capabilityData.data.tpmProperties.tpmProperty[0].value);
+    // uint32_t val1 = BE_TO_HOST_32(capabilityData.data.tpmProperties.tpmProperty[1].value);
+    // uint32_t val2 = BE_TO_HOST_32(capabilityData.data.tpmProperties.tpmProperty[2].value);
+    // LOG_INFO("\t0:\tcount: %d, property: %x, converted: %x",
+    //         capabilityData.data.tpmProperties.count,
+    //         capabilityData.data.tpmProperties.tpmProperty[0].property,
+    //         val0 );
+    // LOG_INFO("\t1:\tcount: %d, property: %x, converted: %x",
+    //         capabilityData.data.tpmProperties.count,
+    //         capabilityData.data.tpmProperties.tpmProperty[1].property,
+    //         val1 );
+    // LOG_INFO("\t2:\tcount: %d, property: %x, converted: %x",
+    //         capabilityData.data.tpmProperties.count,
+    //         capabilityData.data.tpmProperties.tpmProperty[2].property,
+    //         val2 );
+
     rval = Tss2_Sys_HierarchyControl( sysContext, TPM2_RH_PLATFORM, &sessionsData, TPM2_RH_PLATFORM, YES, &sessionsDataOut );
     CheckPassed( rval );
 
     /* Now undefine the index so that next run will work correctly. */
     rval = Tss2_Sys_NV_UndefineSpace( sysContext, TPM2_RH_PLATFORM, TPM20_INDEX_TEST1, &sessionsData, 0 );
-    CheckPassed( rval );
+    //CheckPassed( rval );
 }
 
 static TSS2_RC DefineNvIndex( TPMI_RH_PROVISION authHandle, TPMI_SH_AUTH_SESSION sessionAuthHandle, TPM2B_AUTH *auth, TPM2B_DIGEST *authPolicy,
@@ -2535,11 +2552,8 @@ test_invoke (TSS2_SYS_CONTEXT *sapi_context)
     nullSessionNonceOut.size = 0;
     nullSessionNonce.size = 0;
 
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    CheckPassed(rval);
-
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
-    CheckPassed(rval);
+    rval = TpmReset();
+    CheckPassed( rval );
 
     SysFinalizeTests();
 
@@ -2578,5 +2592,6 @@ test_invoke (TSS2_SYS_CONTEXT *sapi_context)
     TestPcrAllocate();
     TestUnseal();
     EcEphemeralTest();
+
     return 0;
 }
