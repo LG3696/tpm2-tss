@@ -1,4 +1,4 @@
-FROM tpm2software/tpm2-tss AS base
+FROM joholl/tpm2-tss AS base
 
 COPY . /tmp/tpm2-tss/
 WORKDIR /tmp/tpm2-tss
