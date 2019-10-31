@@ -71,6 +71,9 @@ tctildr_make_sticky (
     TPM2_HANDLE *handle,
     uint8_t sticky);
 TSS2_RC
+tctildr_reset (
+    TSS2_TCTI_CONTEXT *tctiContext);
+TSS2_RC
 tcti_from_info (TSS2_TCTI_INFO_FUNC infof,
                 const char *conf,
                 TSS2_TCTI_CONTEXT **context);

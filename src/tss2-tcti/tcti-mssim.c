@@ -393,6 +393,26 @@ out:
     return rc;
 }
 
+TSS2_RC
+tcti_mssim_reset(
+    TSS2_TCTI_CONTEXT *tctiContext)
+{
+    TSS2_RC rc;
+
+    rc = tcti_platform_command (tctiContext, MS_SIM_POWER_OFF);
+    if (rc != TSS2_RC_SUCCESS) {
+        LOG_ERROR ("Failed to issue mssim platform command MS_SIM_POWER_OFF");
+        return rc;
+    }
+    rc = tcti_platform_command (tctiContext, MS_SIM_POWER_ON);
+    if (rc != TSS2_RC_SUCCESS) {
+        LOG_ERROR ("Failed to issue mssim platform command MS_SIM_POWER_ON");
+        return rc;
+    }
+
+    return TSS2_RC_SUCCESS;
+}
+
 /**
  * This function sends the Microsoft simulator the MS_SIM_POWER_ON and
  * MS_SIM_NV_ON commands using the platform command mechanism. Without
@@ -488,6 +508,7 @@ tcti_mssim_init_context_data (
     TSS2_TCTI_GET_POLL_HANDLES (tcti_common) = tcti_mssim_get_poll_handles;
     TSS2_TCTI_SET_LOCALITY (tcti_common) = tcti_mssim_set_locality;
     TSS2_TCTI_MAKE_STICKY (tcti_common) = tcti_make_sticky_not_implemented;
+    TSS2_TCTI_RESET (tcti_common) = tcti_mssim_reset;
     tcti_common->state = TCTI_STATE_TRANSMIT;
     tcti_common->locality = 0;
     memset (&tcti_common->header, 0, sizeof (tcti_common->header));

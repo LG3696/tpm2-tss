@@ -237,6 +237,17 @@ tctildr_make_sticky (
     return Tss2_Tcti_MakeSticky (ldr_ctx->tcti, handle, sticky);
 }
 
+TSS2_RC
+tctildr_reset (
+    TSS2_TCTI_CONTEXT *tctiContext)
+{
+    TSS2_TCTILDR_CONTEXT *ldr_ctx = tctildr_context_cast (tctiContext);
+    if (ldr_ctx == NULL) {
+        return TSS2_TCTI_RC_BAD_CONTEXT;
+    }
+    return Tss2_Tcti_Reset (ldr_ctx->tcti);
+}
+
 void
 tctildr_finalize (
     TSS2_TCTI_CONTEXT *tctiContext)
@@ -432,6 +443,7 @@ Tss2_TctiLdr_Initialize_Ex (const char *name,
     TSS2_TCTI_GET_POLL_HANDLES (ldr_ctx) = tctildr_get_poll_handles;
     TSS2_TCTI_SET_LOCALITY (ldr_ctx) = tctildr_set_locality;
     TSS2_TCTI_MAKE_STICKY (ldr_ctx) = tctildr_make_sticky;
+    TSS2_TCTI_RESET (ldr_ctx) = tctildr_reset;
     ldr_ctx->library_handle = dl_handle;
     ldr_ctx->tcti = *tctiContext;
     *tctiContext = (TSS2_TCTI_CONTEXT*)ldr_ctx;

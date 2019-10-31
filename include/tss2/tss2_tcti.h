@@ -83,6 +83,8 @@ typedef void TSS2_TCTI_POLL_HANDLE;
     ((TSS2_TCTI_CONTEXT_COMMON_V1*)tctiContext)->setLocality
 #define TSS2_TCTI_MAKE_STICKY(tctiContext) \
     ((TSS2_TCTI_CONTEXT_COMMON_V2*)tctiContext)->makeSticky
+#define TSS2_TCTI_RESET(tctiContext) \
+    ((TSS2_TCTI_CONTEXT_COMMON_V2*)tctiContext)->reset
 
 /* Macros to simplify invocation of functions from the common TCTI structure */
 #define Tss2_Tcti_Transmit(tctiContext, size, command) \
@@ -136,6 +138,14 @@ typedef void TSS2_TCTI_POLL_HANDLE;
     (TSS2_TCTI_MAKE_STICKY(tctiContext) == NULL) ? \
         TSS2_TCTI_RC_NOT_IMPLEMENTED: \
     TSS2_TCTI_MAKE_STICKY(tctiContext)(tctiContext, handle, sticky))
+#define Tss2_Tcti_Reset(tctiContext) \
+    ((tctiContext == NULL) ? TSS2_TCTI_RC_BAD_CONTEXT: \
+    (TSS2_TCTI_VERSION(tctiContext) < 2) ? \
+        TSS2_TCTI_RC_ABI_MISMATCH: \
+    (TSS2_TCTI_RESET(tctiContext) == NULL) ? \
+        TSS2_TCTI_RC_NOT_IMPLEMENTED: \
+    TSS2_TCTI_RESET(tctiContext)(tctiContext))
+
 
 typedef struct TSS2_TCTI_OPAQUE_CONTEXT_BLOB TSS2_TCTI_CONTEXT;
 
@@ -167,6 +177,8 @@ typedef TSS2_RC (*TSS2_TCTI_MAKE_STICKY_FCN) (
     TSS2_TCTI_CONTEXT *tctiContext,
     TPM2_HANDLE *handle,
     uint8_t sticky);
+typedef TSS2_RC (*TSS2_TCTI_RESET_FUNC) (
+    TSS2_TCTI_CONTEXT *tctiContext);
 typedef TSS2_RC (*TSS2_TCTI_INIT_FUNC) (
     TSS2_TCTI_CONTEXT *tctiContext,
     size_t *size,
@@ -187,6 +199,7 @@ typedef struct {
 typedef struct {
     TSS2_TCTI_CONTEXT_COMMON_V1 v1;
     TSS2_TCTI_MAKE_STICKY_FCN makeSticky;
+    TSS2_TCTI_RESET_FUNC reset;
 } TSS2_TCTI_CONTEXT_COMMON_V2;
 
 typedef TSS2_TCTI_CONTEXT_COMMON_V2 TSS2_TCTI_CONTEXT_COMMON_CURRENT;

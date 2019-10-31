@@ -431,6 +431,7 @@ Tss2_Tcti_Device_Init (
     TSS2_TCTI_GET_POLL_HANDLES (tctiContext) = tcti_device_get_poll_handles;
     TSS2_TCTI_SET_LOCALITY (tctiContext) = tcti_device_set_locality;
     TSS2_TCTI_MAKE_STICKY (tctiContext) = tcti_make_sticky_not_implemented;
+    TSS2_TCTI_RESET (tctiContext) = tcti_reset_not_implemented;
     tcti_dev = tcti_device_context_cast (tctiContext);
     tcti_common = tcti_device_down_cast (tcti_dev);
     tcti_common->state = TCTI_STATE_TRANSMIT;

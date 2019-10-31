@@ -481,6 +481,27 @@ tcti_socket_transmit_success_test (void **state)
     rc = Tss2_Tcti_Transmit (ctx, command_size, command);
     assert_int_equal (rc, TSS2_RC_SUCCESS);
 }
+/*
+ * This test exercises the successful code path through the reset function.
+ */
+static void
+tcti_socket_reset_success_test (void **state)
+{
+    TSS2_TCTI_CONTEXT *ctx = (TSS2_TCTI_CONTEXT*)*state;
+    TSS2_RC rc = TSS2_RC_SUCCESS;
+    uint8_t recv_buf[4] = { 0 };
+
+    /* send the MS_SIM_POWER_OFF code */
+    will_return (__wrap_write, 4);
+    will_return (__wrap_read, 4);
+    will_return (__wrap_read, recv_buf);
+    /* send the MS_SIM_POWER_OON code */
+    will_return (__wrap_write, 4);
+    will_return (__wrap_read, 4);
+    will_return (__wrap_read, recv_buf);
+    rc = Tss2_Tcti_Reset (ctx);
+    assert_int_equal (rc, TSS2_RC_SUCCESS);
+}
 
 int
 main (int   argc,
@@ -515,6 +536,9 @@ main (int   argc,
                                          tcti_socket_setup,
                                          tcti_socket_teardown),
         cmocka_unit_test_setup_teardown (tcti_socket_transmit_success_test,
+                                  tcti_socket_setup,
+                                  tcti_socket_teardown),
+        cmocka_unit_test_setup_teardown (tcti_socket_reset_success_test,
                                   tcti_socket_setup,
                                   tcti_socket_teardown)
     };

@@ -99,7 +99,6 @@ static void ErrorHandler(UINT32 rval, char *errorString, int errorStringSize)
 static void Cleanup()
 {
     if (resMgrTctiContext != NULL) {
-        tcti_platform_command(resMgrTctiContext, MS_SIM_POWER_OFF);
         tcti_teardown(resMgrTctiContext);
         resMgrTctiContext = NULL;
     }
@@ -140,18 +139,6 @@ static void InitSysContextFailure()
     } \
   }
 
-static TSS2_RC TpmReset()
-{
-    TSS2_RC rval = TSS2_RC_SUCCESS;
-
-    rval = (TSS2_RC)tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    if( rval == TSS2_RC_SUCCESS )
-    {
-        rval = (TSS2_RC)tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
-    }
-    return rval;
-}
-
 static void TestDictionaryAttackLockReset()
 {
     UINT32 rval;
@@ -180,7 +167,7 @@ static void TestTpmStartup()
      */
 
     /* First must do TPM reset. */
-    rval = TpmReset();
+    rval = Tss2_Tcti_Reset( resMgrTctiContext );
     CheckPassed(rval);
 
     /* This one should pass. */
@@ -193,10 +180,8 @@ static void TestTpmStartup()
 
 
     /* Cycle power using simulator interface. */
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    CheckPassed( rval );
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
-    CheckPassed( rval );
+    rval = Tss2_Tcti_Reset( resMgrTctiContext );
+    CheckPassed(rval);
 
 
     /*
@@ -210,10 +195,8 @@ static void TestTpmStartup()
     CheckPassed( rval );
 
     /* Cycle power using simulator interface. */
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    CheckPassed( rval );
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
-    CheckPassed( rval );
+    rval = Tss2_Tcti_Reset( resMgrTctiContext );
+    CheckPassed(rval);
 
 
     /*
@@ -848,8 +831,8 @@ static void TestHierarchyControl()
     CheckFailed( rval, TPM2_RC_1 + TPM2_RC_HIERARCHY );
 
     /* Need to do TPM reset and Startup to re-enable platform hierarchy. */
-    rval = TpmReset();
-    CheckPassed(rval);
+    rval = Tss2_Tcti_Reset( resMgrTctiContext );
+    CheckPassed( rval );
 
     rval = Tss2_Sys_Startup ( sysContext, TPM2_SU_CLEAR );
     CheckPassed( rval );
@@ -2535,10 +2518,7 @@ test_invoke (TSS2_SYS_CONTEXT *sapi_context)
     nullSessionNonceOut.size = 0;
     nullSessionNonce.size = 0;
 
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_OFF );
-    CheckPassed(rval);
-
-    rval = tcti_platform_command( resMgrTctiContext, MS_SIM_POWER_ON );
+    rval = Tss2_Tcti_Reset( resMgrTctiContext );
     CheckPassed(rval);
 
     SysFinalizeTests();

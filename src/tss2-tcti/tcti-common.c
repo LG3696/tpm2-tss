@@ -99,6 +99,14 @@ tcti_make_sticky_not_implemented (
 }
 
 TSS2_RC
+tcti_reset_not_implemented (
+    TSS2_TCTI_CONTEXT *tctiContext)
+{
+    (void)(tctiContext);
+    return TSS2_TCTI_RC_NOT_IMPLEMENTED;
+}
+
+TSS2_RC
 header_unmarshal (
     const uint8_t *buf,
     tpm_header_t *header)

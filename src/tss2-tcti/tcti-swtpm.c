@@ -337,30 +337,6 @@ tcti_swtpm_set_locality (
     return TSS2_RC_SUCCESS;
 }
 
-/*
- * For compatibility to the mssim platform commands issued by some tests:
- * Mapping mssim platform commands to swtpm control channel commands //TODO
- */
-TSS2_RC tcti_platform_command (
-    TSS2_TCTI_CONTEXT *tctiContext,
-    UINT32 cmd)
-{
-    LOG_TRACE("Mapping mssim platform command: %" PRIu32, cmd);
-
-    if (cmd == 1) {         //MS_SIM_POWER_ON
-        return tcti_swtpm_reset(tctiContext);
-    } else if (cmd == 2) {  // MS_SIM_POWER_OFF
-        return TSS2_RC_SUCCESS;
-    } else if (cmd == 9) {  // MS_SIM_CANCEL_ON
-        // to SKIP sapi-command-cancel.int.c
-        return TSS2_TCTI_RC_BAD_CONTEXT;
-    } else if (cmd == 10) {  // MS_SIM_CANCEL_OFF
-        return TSS2_RC_SUCCESS;
-    } else {
-        return TSS2_TCTI_RC_NOT_IMPLEMENTED;
-    }
-}
-
 TSS2_RC
 tcti_swtpm_get_poll_handles (
     TSS2_TCTI_CONTEXT *tctiContext,
@@ -534,6 +510,7 @@ tcti_swtpm_init_context_data (
     TSS2_TCTI_GET_POLL_HANDLES (tcti_common) = tcti_swtpm_get_poll_handles;
     TSS2_TCTI_SET_LOCALITY (tcti_common) = tcti_swtpm_set_locality;
     TSS2_TCTI_MAKE_STICKY (tcti_common) = tcti_make_sticky_not_implemented;
+    TSS2_TCTI_RESET (tcti_common) = tcti_swtpm_reset;
     tcti_common->state = TCTI_STATE_TRANSMIT;
     memset (&tcti_common->header, 0, sizeof (tcti_common->header));
 }

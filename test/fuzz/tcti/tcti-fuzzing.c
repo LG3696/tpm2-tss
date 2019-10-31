@@ -228,6 +228,7 @@ tcti_fuzzing_init_context_data (
     TSS2_TCTI_GET_POLL_HANDLES (tcti_common) = tcti_fuzzing_get_poll_handles;
     TSS2_TCTI_SET_LOCALITY (tcti_common) = tcti_fuzzing_set_locality;
     TSS2_TCTI_MAKE_STICKY (tcti_common) = tcti_make_sticky_not_implemented;
+    TSS2_TCTI_RESET (tcti_common) = tcti_reset_not_implemented;
     tcti_common->state = TCTI_STATE_TRANSMIT;
     tcti_common->locality = 3;
     memset (&tcti_common->header, 0, sizeof (tcti_common->header));

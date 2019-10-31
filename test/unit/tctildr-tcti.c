@@ -91,6 +91,11 @@ tctildr_mock_make_sticky (TSS2_TCTI_CONTEXT *context,
 {
     return mock_type (TSS2_RC);
 }
+TSS2_RC
+tctildr_mock_reset (TSS2_TCTI_CONTEXT *context)
+{
+    return mock_type (TSS2_RC);
+}
 #define TSS2_TCTI_MOCK_CONTEXT TSS2_TCTI_CONTEXT_COMMON_V2
 #define TEST_TCTI_HANDLE (TSS2_TCTI_LIBRARY_HANDLE)0x9827635
 static int
@@ -108,6 +113,7 @@ tctildr_setup (void **state)
     TSS2_TCTI_GET_POLL_HANDLES (ldr_ctx) = tctildr_get_poll_handles;
     TSS2_TCTI_SET_LOCALITY (ldr_ctx) = tctildr_set_locality;
     TSS2_TCTI_MAKE_STICKY (ldr_ctx) = tctildr_make_sticky;
+    TSS2_TCTI_RESET (ldr_ctx) = tctildr_reset;
     ldr_ctx->library_handle = TEST_TCTI_HANDLE;
 
     tmp = calloc (1, sizeof (TSS2_TCTI_MOCK_CONTEXT));
@@ -120,6 +126,7 @@ tctildr_setup (void **state)
     TSS2_TCTI_GET_POLL_HANDLES (ldr_ctx->tcti) = tctildr_mock_get_poll_handles;
     TSS2_TCTI_SET_LOCALITY (ldr_ctx->tcti) = tctildr_mock_set_locality;
     TSS2_TCTI_MAKE_STICKY (ldr_ctx->tcti) = tctildr_mock_make_sticky;
+    TSS2_TCTI_RESET (ldr_ctx->tcti) = tctildr_mock_reset;
 
     *state = ldr_ctx;
 
@@ -266,6 +273,25 @@ tctildr_make_sticky_null_test (void **state)
     rc = tctildr_make_sticky (NULL, &handle, TPM2_YES);
     assert_int_equal (rc, TSS2_TCTI_RC_BAD_CONTEXT);
 }
+static void
+tctildr_reset_test (void **state)
+{
+    TSS2_RC rc;
+    TSS2_TCTI_CONTEXT *context = (TSS2_TCTI_CONTEXT*)*state;
+
+    will_return (tctildr_mock_reset, TSS2_RC_SUCCESS);
+    rc = Tss2_Tcti_Reset (context);
+    assert_int_equal (rc, TSS2_RC_SUCCESS);
+}
+static void
+tctildr_reset_null_test (void **state)
+{
+    TSS2_RC rc;
+    UNUSED (state);
+
+    rc = tctildr_reset (NULL);
+    assert_int_equal (rc, TSS2_TCTI_RC_BAD_CONTEXT);
+}
 /*
  * This test covers the 'sanity test' path in the tctildr finalize
  * function. There's not really a way to check whether or not this test
@@ -317,6 +343,12 @@ main (int argc, char* arvg[])
                                          tctildr_setup,
                                          tctildr_teardown),
         cmocka_unit_test_setup_teardown (tctildr_make_sticky_null_test,
+                                         tctildr_setup,
+                                         tctildr_teardown),
+        cmocka_unit_test_setup_teardown (tctildr_reset_test,
+                                         tctildr_setup,
+                                         tctildr_teardown),
+        cmocka_unit_test_setup_teardown (tctildr_reset_null_test,
                                          tctildr_setup,
                                          tctildr_teardown),
         cmocka_unit_test (tctildr_finalize_null_ctx_test),

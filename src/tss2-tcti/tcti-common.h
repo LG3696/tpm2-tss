@@ -110,6 +110,13 @@ tcti_make_sticky_not_implemented (
     TPM2_HANDLE *handle,
     uint8_t sticky);
 /*
+ * Just a function with the right prototype that returns the not implemented
+ * RC for the TCTI layer.
+ */
+TSS2_RC
+tcti_reset_not_implemented (
+    TSS2_TCTI_CONTEXT *tctiContext);
+/*
  * Utility to function to parse the first 10 bytes of a buffer and populate
  * the 'header' structure with the results. The provided buffer is assumed to
  * be at least 10 bytes long.
