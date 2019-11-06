@@ -16,9 +16,11 @@ if TESTPTPM
 INT_LOG_COMPILER = $(srcdir)/script/int-log-compiler-ptpm.sh
 INT_LOG_FLAGS = --ptpm=$(PTPM)
 else
-INT_LOG_COMPILER = $(srcdir)/script/int-log-compiler.sh
+INT_LOG_COMPILER = $(srcdir)/script/int-log-compiler-swtpm.sh
 endif
-EXTRA_DIST += $(srcdir)/script/int-log-compiler.sh $(srcdir)/script/int-log-compiler-ptpm.sh
+EXTRA_DIST += $(srcdir)/script/int-log-compiler-swtpm.sh \
+              $(srcdir)/script/int-log-compiler-tpmserver.sh \
+              $(srcdir)/script/int-log-compiler-ptpm.sh
 AM_TESTS_ENVIRONMENT = PATH="$(PATH)"
 
 check-programs: $(check_PROGRAMS)
