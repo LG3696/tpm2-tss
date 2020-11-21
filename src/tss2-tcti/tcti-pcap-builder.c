@@ -311,7 +311,7 @@ pcap_deinit (pcap_buider_ctx *ctx)
 {
     int ret;
 
-    if (ctx->fd != STDOUT_FILENO && ctx->fd != STDERR_FILENO) {
+    if (ctx->fd != STDOUT_FILENO && ctx->fd != STDERR_FILENO && ctx->fd >= 0) {
         ret = close (ctx->fd);
         if (ret != 0) {
             LOG_WARNING ("Failed to close file: %s", strerror (errno));
