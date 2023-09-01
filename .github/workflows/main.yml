@@ -18,7 +18,7 @@ jobs:
         run: uname -a
       - name: Launch Action
         uses:
-          tpm2-software/ci/runCI@main
+          joholl/ci/runCI@main
         with:
           DOCKER_IMAGE: ${{ matrix.docker_image }}
           CC: ${{ matrix.compiler }}
