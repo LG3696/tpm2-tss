@@ -7,8 +7,13 @@ jobs:
     if: "!contains(github.ref, 'coverity_scan')"
     strategy:
       matrix:
-        docker_image: [ubuntu-22.04, ubuntu-22.04.s390x]
-        compiler: [clang]
+        include:
+          - docker_image: ubuntu-22.04
+            docker_arch: amd64
+            compiler: clang
+          - docker_image: ubuntu-22.04.s390x
+            docker_arch: s390x
+            compiler: clang
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -21,6 +26,7 @@ jobs:
           joholl/ci/runCI@main
         with:
           DOCKER_IMAGE: ${{ matrix.docker_image }}
+          DOCKER_ARCH: ${{ matrix.docker_arch }}
           CC: ${{ matrix.compiler }}
           BASE_REF: ${{ github.base_ref }}
           PROJECT_NAME: ${{ github.event.repository.name }}
