@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 set -eo pipefail
+set -x
 
 source $DOCKER_BUILD_DIR/.ci/docker-prelude.sh
 
@@ -45,15 +46,15 @@ if [ "$TEST_TCTI_CONFIG" != "true" ]; then
 #
 
 # build with no tests enabled
-mkdir ./build-no-tests
-pushd ./build-no-tests
+# mkdir ./build-no-tests
+# pushd ./build-no-tests
 
-echo "PWD: $(pwd)"
-echo "ls -la ../ $(ls -la ../)"
+# echo "PWD: $(pwd)"
+# echo "ls -la ../ $(ls -la ../)"
 
-../configure --with-crypto=$WITH_CRYPTO $CONFIGURE_OPTIONS
-make -j$(nproc)
-popd
+# ../configure --with-crypto=$WITH_CRYPTO $CONFIGURE_OPTIONS
+# make -j$(nproc)
+# popd
 
 if [ "$WITH_CRYPTO" == "none" ]; then
     echo "Exiting without running tests becuase crypto backend is none"
@@ -87,9 +88,9 @@ fi
 if [ "$SCANBUILD" == "yes" ]; then
   scan-build --status-bugs make -j
 elif [ "$CC" == "clang" ]; then
-  make -j distcheck
+  make -j$(nproc) distcheck
 else
-  make -j check
+  make -j$(nproc) check
 fi
 
 popd
