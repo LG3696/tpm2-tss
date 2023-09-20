@@ -88,7 +88,8 @@ fi
 if [ "$SCANBUILD" == "yes" ]; then
   scan-build --status-bugs make -j
 elif [ "$CC" == "clang" ]; then
-  make -j$(nproc) distcheck
+  # make -j$(nproc) distcheck
+  make -j$(nproc) check TESTS="test/integration/sys-asymmetric-encrypt-decrypt"
 else
   make -j$(nproc) check
 fi

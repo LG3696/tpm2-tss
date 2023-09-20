@@ -8,6 +8,7 @@
 # All rights reserved.
 #;**********************************************************************;
 set -u
+set -x
 
 usage_error ()
 {
@@ -233,10 +234,22 @@ try_simulator_start ()
         fi
         PID=$(cat ${SIM_PID_FILE})
         echo "simulator PID: ${PID}";
+
+        ${sock_tool} ${sock_tool_params}
+        ret_data=$?
+        echo "ret_data=$ret_data"
+
         ${sock_tool} ${sock_tool_params} 2> /dev/null | grep "${PID}" | grep "${SIM_PORT_DATA}"
         ret_data=$?
+
+
+        ${sock_tool} ${sock_tool_params}
+        ret_cmd=$?
+        echo "ret_cmd=$ret_cmd"
+
         ${sock_tool} ${sock_tool_params} 2> /dev/null | grep "${PID}" | grep "${SIM_PORT_CMD}"
         ret_cmd=$?
+
         if test $ret_data -eq 0 && test $ret_cmd -eq 0; then
             echo "Simulator with PID ${PID} bound to port ${SIM_PORT_DATA} and " \
                  "${SIM_PORT_CMD} successfully.";
