@@ -1,0 +1,2 @@
+[workspace]
+members = ["tss2-tcti", "tss2-tcti-sys", "tss2-tcti-foobar", "tpm2-tcti-rm", "tpm2-types"]
