@@ -91,18 +91,18 @@ fn main() {
                 parameters: TPMS_ECC_PARMS {
                     symmetric: TPMT_SYM_DEF_OBJECT {
                         //algorithm: TPM_ALG::NULL as u16,
-                        sym: TPMU_SYM_DEF_OBJECT::null,
+                        sym: TPMU_SYM_DEF_OBJECT::null {},
                     },
                     scheme: TPMT_ECC_SCHEME {
-                        scheme: TPM_ALG::ECDH as u16,
+                        //scheme: TPM_ALG::ECDH as u16,
                         details: TPMU_ASYM_SCHEME::ecdh(TPMS_KEY_SCHEME_ECDH {
                             hashAlg: TPM_ALG::SHA256 as u16,
                         }),
                     },
                     curveID: TPM_ECC_CURVE::NIST_P256 as u16,
                     kdf: TPMT_KDF_SCHEME {
-                        scheme: TPM_ALG::NULL as u16,
-                        details: TPMU_KDF_SCHEME::null,
+                        //scheme: TPM_ALG::NULL as u16,
+                        details: TPMU_KDF_SCHEME::null {},
                     },
                 },
                 unique: TPMS_ECC_POINT {

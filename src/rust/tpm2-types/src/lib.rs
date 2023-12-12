@@ -1,10 +1,11 @@
+#[allow(non_camel_case_types)]
 pub mod types {
-    use std::{collections::HashMap, default};
 
     use serde::{Deserialize, Serialize};
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
     #[repr(u16)]
+    #[serde(use_repr)]
     pub enum TPM_ALG {
         ERROR = 0x0000,
         RSA = 0x0001,
@@ -51,6 +52,7 @@ pub mod types {
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
     #[repr(u16)]
+    #[serde(use_repr)]
     pub enum TPM_ECC_CURVE {
         #[default]
         NONE = 0x0000,
@@ -143,7 +145,7 @@ pub mod types {
 
     type TPMT_RSA_SCHEME = TPMU_ASYM_SCHEME; // selected by TPMI_ALG_RSA_SCHEME
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     pub struct TPMS_RSA_PARMS {
         pub symmetric: TPMT_SYM_DEF_OBJECT, // TODO TPMT_SYM_DEF_OBJECT+
         pub scheme: TPMT_RSA_SCHEME,        // TODO TPMT_SYM_DEF_OBJECT+
@@ -151,7 +153,7 @@ pub mod types {
         pub exponent: u32,
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     pub struct TPMT_SYM_DEF_OBJECT {
         // TODO selector: pub algorithm: TPMI_ALG_SYM_OBJECT,
         // pub keyBits: TPMU_SYM_KEY_BITS,
@@ -160,8 +162,9 @@ pub mod types {
         pub sym: TPMU_SYM_DEF_OBJECT, // combines unions keyBits/mode/details
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     #[repr(u16)]
+    #[serde(use_repr)]
     pub enum TPMU_SYM_DEF_OBJECT {
         tdes {
             keyBits: TPMI_TDES_KEY_BITS,
@@ -186,8 +189,7 @@ pub mod types {
         xor {
             keyBits: TPMI_ALG_HASH,
         } = TPM_ALG::XOR as u16,
-        #[default]
-        null = TPM_ALG::NULL as u16,
+        null {} = TPM_ALG::NULL as u16,
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
@@ -206,8 +208,9 @@ pub mod types {
     pub type TPMS_ENC_SCHEME_OAEP = TPMS_SCHEME_HASH;
     pub type TPMS_ENC_SCHEME_RSAES = TPMS_SCHEME_HASH;
 
-    #[derive(Serialize, Deserialize, Debug, Default, Clone, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     #[repr(u16)]
+    #[serde(use_repr)]
     pub enum TPMU_ASYM_SCHEME {
         ecdh(TPMS_KEY_SCHEME_ECDH) = TPM_ALG::ECDH as u16,
         ecmqv(TPMS_KEY_SCHEME_ECMQV) = TPM_ALG::ECMQV as u16,
@@ -220,14 +223,13 @@ pub mod types {
         oaep(TPMS_ENC_SCHEME_OAEP) = TPM_ALG::OAEP as u16,
         rsaes(TPMS_ENC_SCHEME_RSAES) = TPM_ALG::RSAES as u16,
         anySig(TPMS_SCHEME_HASH) = 0xffff,
-        #[default]
-        null = TPM_ALG::NULL as u16,
+        null {} = TPM_ALG::NULL as u16,
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     pub struct TPMT_ECC_SCHEME {
         // "details": "scheme",
-        pub scheme: TPMI_ALG_ECC_SCHEME,
+        // pub scheme: TPMI_ALG_ECC_SCHEME,
         pub details: TPMU_ASYM_SCHEME,
     }
 
@@ -236,25 +238,25 @@ pub mod types {
     pub type TPMS_SCHEME_KDF1_SP800_56A = TPMS_SCHEME_HASH;
     pub type TPMS_SCHEME_KDF2 = TPMS_SCHEME_HASH;
 
-    #[derive(Serialize, Deserialize, Debug, Default, Clone, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     #[repr(u16)]
+    #[serde(use_repr)]
     pub enum TPMU_KDF_SCHEME {
         mgf1(TPMS_SCHEME_MGF1) = TPM_ALG::MGF1 as u16,
         kdf1_sp800_108(TPMS_SCHEME_KDF1_SP800_108) = TPM_ALG::KDF1_SP800_108 as u16,
         kdf1_sp800_56a(TPMS_SCHEME_KDF1_SP800_56A) = TPM_ALG::KDF1_SP800_56A as u16,
         kdf2(TPMS_SCHEME_KDF2) = TPM_ALG::KDF2 as u16,
-        #[default]
-        null = TPM_ALG::NULL as u16,
+        null {} = TPM_ALG::NULL as u16,
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     pub struct TPMT_KDF_SCHEME {
         // "details": "scheme",
-        pub scheme: TPMI_ALG_KDF,
+        //pub scheme: TPMI_ALG_KDF,
         pub details: TPMU_KDF_SCHEME,
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     pub struct TPMS_ECC_PARMS {
         pub symmetric: TPMT_SYM_DEF_OBJECT,
         pub scheme: TPMT_ECC_SCHEME,
@@ -319,6 +321,7 @@ pub mod types {
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     #[repr(u16)]
+    #[serde(use_repr)]
     pub enum TPMU_PUBLIC {
         // TODO
         // keyedHash {
@@ -352,7 +355,7 @@ pub mod types {
         // what about unselectable TPMU_PUBLIC_PARMS.asymDetail and TPMU_PUBLIC_ID.derive?
     }
 
-    impl Default for TPMU_PUBLIC {
+    /*impl Default for TPMU_PUBLIC {
         fn default() -> TPMU_PUBLIC {
             // TODO why does ..Default::default() result in an error?
             TPMU_PUBLIC::ecc {
@@ -363,9 +366,9 @@ pub mod types {
                 unique: Default::default(),
             }
         }
-    }
+    }*/
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     pub struct TPMT_PUBLIC {
         // TODO selector: pub type_: TPMI_ALG_PUBLIC,
         pub public: TPMU_PUBLIC,
@@ -376,7 +379,7 @@ pub mod types {
         // pub unique: TPMU_PUBLIC_ID,
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
     pub struct TPM2B_PUBLIC {
         pub size: u16,
         pub publicArea: TPMT_PUBLIC,

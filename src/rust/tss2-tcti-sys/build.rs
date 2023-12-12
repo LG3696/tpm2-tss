@@ -4,23 +4,20 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    //let project_dir = env::current_dir().expect("Failed to retrieve current directory");
+    let project_dir = env::current_dir().expect("Failed to retrieve current directory");
 
     let bindings = bindgen::Builder::default()
         .header(
-                //.join("../../../include/tss2/tss2_tcti.h")
-                "/home/johannes/persistent/dev-projects/tpm/tpm2-tss/include/tss2/tss2_tcti.h"
+            //.join("../../../include/tss2/tss2_tcti.h")
+            "../../../include/tss2/tss2_tcti.h",
         )
-        .header("/home/johannes/persistent/dev-projects/tpm/tpm2-tss/include/tss2/tss2_common.h")
-        .header("/home/johannes/persistent/dev-projects/tpm/tpm2-tss/include/tss2/tss2_tctildr.h")
-        .header("/home/johannes/persistent/dev-projects/tpm/tpm2-tss/src/tss2-tcti/tctildr.h")
-        .header("/home/johannes/persistent/dev-projects/tpm/tpm2-tss/src/tss2-tcti/tcti-common.h")
+        .header("../../../include/tss2/tss2_common.h")
+        .header("../../../include/tss2/tss2_tctildr.h")
+        .header("../../../src/tss2-tcti/tctildr.h")
+        .header("../../../src/tss2-tcti/tcti-common.h")
         //.header(project_dir.join("/home/johannes/persistent/dev-projects/tpm/tpm2-tss/src/tss2-tcti/tctildr.h").to_str().unwrap())
         .clang_args([
-            &format!(
-                "-I{}",
-                "/home/johannes/persistent/dev-projects/tpm/tpm2-tss/include/tss2"
-            ),
+            &format!("-I{}", "../../../include/tss2"),
             // format!(
             //     "-L{}",
             //     project_dir
@@ -42,6 +39,6 @@ fn main() {
 
     // TODO fix paths
     //println!("cargo:rustc-link-search=../../src/tss2-tcti/.libs");
-    println!("cargo:rustc-link-search=/home/johannes/persistent/dev-projects/tpm/tpm2-tss/src/tss2-tcti/.libs");
+    println!("cargo:rustc-link-search={project_dir:?}/src/tss2-tcti/.libs");
     println!("cargo:rustc-link-lib=tss2-tctildr");
 }

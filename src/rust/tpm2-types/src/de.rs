@@ -683,14 +683,14 @@ impl<'de, 'a> EnumAccess<'de> for MyEnumAccess<'a, 'de> {
         //let value = seed.deserialize(&mut *self.de)?);
 
         //let variant: u16 = 35;
-        let mut variant = self.de.parse_u16()?; // TODO what if selector is no u16
+        let variant = self.de.parse_u16()?; // TODO what if selector is no u16
         log::info!(
             "deserializing {:i$} :u16 = {:04x}",
             "",
             variant,
             i = self.de.indent()
         );
-        variant = 1;
+        //variant = 1;
         //let idx = u32::decode(&mut self.de)?;
         let value = seed.deserialize(variant.into_deserializer())?;
         Ok((value, self))
